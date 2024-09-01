@@ -18,8 +18,6 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins")
-
-
 require("debugger")
 
 -- local vimrcを読み込む設定
@@ -31,4 +29,5 @@ local function load_local_vimrc()
 end
 -- Neovimが起動するたびにlocal vimrcを読み込む
 load_local_vimrc()
+vim.cmd[[:ClangFormatAutoEnable]]
 

@@ -12,7 +12,7 @@ function compile_current_cpp()
 end
 function compile_without_g_cpp()
     local filename = vim.fn.expand('%:p')
-    vim.cmd('w | !g++ ' .. filename)
+    vim.cmd('w | !g++ -O2 ' .. filename)
     -- vim.cmd('!g++ ' .. filename)
 end
 -- function compile_without_g_cpp()

@@ -31,6 +31,7 @@ dap.configurations.cpp = {
     stopOnEntry = false,
   },
 }
+dap.configurations.rust = dap.configurations.cpp
 
 local function remove_repl()
     local buffers = vim.api.nvim_list_bufs()
