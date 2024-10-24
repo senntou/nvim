@@ -1,6 +1,5 @@
 require("colorscheme")
 require("options")
-require("keymapping")
 
 vim.cmd[[let g:python3_host_prog = 'C:\Users\watar\AppData\Local\Programs\Python\Python312\python.exe']]
 
@@ -17,6 +16,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins")
+require("keymapping")
 
 -- local vimrcを読み込む設定
 local function load_local_vimrc()
@@ -25,6 +25,6 @@ local function load_local_vimrc()
     vim.cmd('source ' .. local_vimrc)
   end
 end
+
 -- Neovimが起動するたびにlocal vimrcを読み込む
 load_local_vimrc()
-
