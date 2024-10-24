@@ -17,6 +17,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins")
 require("keymapping")
+require("commands")
 
 -- local vimrcを読み込む設定
 local function load_local_vimrc()

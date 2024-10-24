@@ -1,3 +1,10 @@
 {
-    eslint.autoConfigOnSave : true
+    "eslint.autoConfigOnSave" : true,
+    "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact"
+    ],
+    "coc.preferences.formatOnSaveFiletypes": ["javascript", "javascriptreact", "typescript", "typescriptreact", "css"]
 }
