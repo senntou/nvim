@@ -19,7 +19,11 @@ require("lazy").setup("plugins")
 require("keymapping.default")
 require("keymapping.lspconfig")
 require("options.lspconfig")
+require("options.cmp")
+require("options.treesitter")
+require("options.bufferline")
 require("commands")
+
 
 -- local vimrcを読み込む設定
 local function load_local_vimrc()
