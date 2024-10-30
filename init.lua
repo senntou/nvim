@@ -1,4 +1,3 @@
-require("colorscheme")
 require("options.options")
 
 vim.cmd[[let g:python3_host_prog = 'C:\Users\watar\AppData\Local\Programs\Python\Python312\python.exe']]
@@ -16,10 +15,8 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins")
+require("colorscheme")
 require("keymapping.default")
-require("keymapping.lspconfig")
-require("options.lspconfig")
-require("options.cmp")
 require("options.treesitter")
 require("options.bufferline")
 require("commands")
