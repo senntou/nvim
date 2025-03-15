@@ -8,3 +8,12 @@ require'lspconfig'.clangd.setup {
     clangdFileStatus = true
   }
 }
+
+-- auto format
+-- save時にvim.lsp.buf.format()を実行
+vim.api.nvim_create_autocmd("BufWritePre",{
+  pattern = "*",
+  callback = function()
+    vim.lsp.buf.format()
+  end
+})

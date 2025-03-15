@@ -15,17 +15,20 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup("plugins")
-require("colorscheme")
+-- vscodeからNeovimを開いた場合は、プラグインを使用しない
+if not vim.g.vscode then
+  require("lazy").setup("plugins")
+  require("colorscheme")
+  require("plugin-options.bufferline")
+  require("plugin-options.nerdtree")
+  require("plugin-options.telescope")
+  require("plugin-options.transparent")
+  require("plugin-options.treesitter")
+  require("plugin-options.lspconfig")
+end
+
 require("keymapping.default")
 require("commands")
-require("plugin-options.bufferline")
-require("plugin-options.nerdtree")
-require("plugin-options.telescope")
-require("plugin-options.transparent")
-require("plugin-options.treesitter")
-require("plugin-options.lspconfig")
-
 
 -- local vimrcを読み込む設定
 local function load_local_vimrc()
