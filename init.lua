@@ -24,6 +24,7 @@ require("plugin-options.nerdtree")
 require("plugin-options.telescope")
 require("plugin-options.transparent")
 require("plugin-options.treesitter")
+require("plugin-options.lspconfig")
 
 
 -- local vimrcを読み込む設定
