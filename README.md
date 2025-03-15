@@ -1,3 +1,12 @@
+# ディレクトリ構成
+
+- `init.lua`
+  - 最初に実行されるluaファイル
+- `colors/`
+  - colorschemeファイルを保存する
+- `lua/`
+  - init.luaを除くluaファイルが格納される   
+
 # 導入しているプラグイン
 
 ### lazy.nvim
