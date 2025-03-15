@@ -1,3 +1,1 @@
-vim.cmd[[
-command! -nargs=0 Format :call CocAction('format')
-]]
+-- 自作のコマンドはここに追加していく
