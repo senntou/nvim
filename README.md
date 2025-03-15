@@ -1,3 +1,14 @@
+# 環境構築の手順
+
+- LSPを使った静的解析
+    - masonでLSPをインストール
+    - plugin-options/lspconfig.luaに追記
+- フォーマッタ
+    - こちらもplugin-options/lspconfig.luaに追記
+- 補完
+    - nvim-cmpを使って補完を追加
+    - plugin-options/cmp.luaに追記
+
 # ディレクトリ構成
 
 - `init.lua`
@@ -13,8 +24,12 @@
 lazy.nvim is a modern plugin manager for Neovim.
 
 ### bufferline.nvim
-https://github.com/akinsho/bufferline.nvim?tab=readme-ov-file#features
+https://github.com/akinsho/bufferline.nvim
 タブバーを追加するためのプラグイン
+
+### nvim-cmp & cmp-nvim-lsp
+https://github.com/hrsh7th/nvim-cmp
+補完を追加するためのプラグイン
 
 ### copilot.vim
 https://github.com/github/copilot.vim
