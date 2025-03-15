@@ -18,9 +18,12 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins")
 require("colorscheme")
 require("keymapping.default")
-require("plugin-options.treesitter")
-require("plugin-options.bufferline")
 require("commands")
+require("plugin-options.bufferline")
+require("plugin-options.nerdtree")
+require("plugin-options.telescope")
+require("plugin-options.transparent")
+require("plugin-options.treesitter")
 
 
 -- local vimrcを読み込む設定
