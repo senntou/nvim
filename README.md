@@ -10,37 +10,37 @@
 # 導入しているプラグイン
 
 ### lazy.nvim
-> lazy.nvim is a modern plugin manager for Neovim.
-
-Neovimのプラグインマネージャ
+lazy.nvim is a modern plugin manager for Neovim.
 
 ### bufferline.nvim
 https://github.com/akinsho/bufferline.nvim?tab=readme-ov-file#features
-
-> A snazzy buffer line (with tabpage integration) for Neovim built using lua.
-
 タブバーを追加するためのプラグイン
 
 ### copilot.vim
 https://github.com/github/copilot.vim
-
-> GitHub Copilot for Vim
-
-VSCodeのGitHub CopilotをNeovimで使うためのプラグイン
+GitHub Copilot for Neovim
 
 ### mason.nvim
 https://github.com/williamboman/mason.nvim
 LSPサーバーなどの外部ツールをインストールするためのプラグイン
 
+### mason-lspconfig.nvim
+https://github.com/williamboman/mason-lspconfig.nvim
+lspconfigからmasonでインストールしたlspを自動で起動できるなど
+
 ### neoscroll.nvim
 https://github.com/karb94/neoscroll.nvim
 Neovim上でのスクロールをスムーズにする
 
-### nerdtree.nvim
+### nerdtree
 https://github.com/preservim/nerdtree
 VSCodeのようなファイルエクスプローラーをサイドバーに表示する
 
-### nvim-treesitter.nvim
+### nvim-lspconfig
+https://github.com/neovim/nvim-lspconfig
+nvimのlspをラップして、configの設定を簡単にするプラグイン
+
+### nvim-treesitter
 https://github.com/nvim-treesitter/nvim-treesitter
 コードを色分けするのに必要
 
