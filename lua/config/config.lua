@@ -19,5 +19,5 @@ vim.o.smartindent = true
 vim.cmd[[ autocmd FileType cpp setlocal commentstring=//\ %s ]]
 
 -- NERDTreeが最後のウィンドウになったら閉じる
--- vim.cmd[[ autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif ]]
+vim.cmd[[ autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif ]]
 

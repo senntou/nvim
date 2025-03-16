@@ -1,3 +1,8 @@
+-- 各プラグインのキーマップやターミナルのキーマップは、コンフィグファイルに記載してください
+-- ここに記載するのは、Vimのデフォルトのキーマップの設定です
+
+
+
 -- :bnext and :bprev
 vim.keymap.set('n', '<C-\\><C-j>', function() vim.cmd(':bprev') end, { desc = 'Previous buffer' })
 vim.keymap.set('n', '<C-\\><C-k>', function() vim.cmd(':bnext') end, { desc = 'Next buffer' })
