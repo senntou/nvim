@@ -23,6 +23,9 @@ vim.keymap.set('n', '<C-\\><C-h>', prev_buffer, { desc = 'Previous buffer' })
 vim.keymap.set('n', '<C-\\><C-k>', next_buffer, { desc = 'Next buffer' })
 vim.keymap.set('n', '<C-\\><C-l>', next_buffer, { desc = 'Next buffer' })
 
+-- バッファの削除
+vim.keymap.set('n', '<C-\\><C-d>', ':bd<CR>', { desc = 'Delete buffer' })
+
 -- ctrl + hjkl
 vim.keymap.set('i', '<C-j>', '<Down>', { noremap = true })
 vim.keymap.set('i', '<C-k>', '<Up>', { noremap = true })
