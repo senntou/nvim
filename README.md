@@ -1,5 +1,13 @@
-# 環境構築の手順
+# 導入時に確認すること
+#### Fontのインストール
 
+windowsの場合、powershellからインストールし、windows terminalの設定から変更する
+```
+& ([scriptblock]::Create((iwr 'https://to.loredo.me/Install-NerdFont.ps1'))) -Name cascadia-mono-nerd-font
+```
+
+
+# 言語の解析を追加する手順
 - LSPを使った静的解析
     - masonでLSPをインストール
     - plugin-options/lspconfig.luaに追記
@@ -22,6 +30,10 @@
 
 ### lazy.nvim
 lazy.nvim is a modern plugin manager for Neovim.
+
+### lualine.nvim
+https://github.com/nvim-lualine/lualine.nvim
+ステータスラインをカスタマイズするためのプラグイン
 
 ### auto-pairs
 https://github.com/jiangmiao/auto-pairs
