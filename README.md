@@ -59,6 +59,10 @@ Neovim上でのスクロールをスムーズにする
 https://github.com/preservim/nerdtree
 VSCodeのようなファイルエクスプローラーをサイドバーに表示する
 
+### noice.nvim
+https://github.com/MunifTanjim/nui.nvim
+コマンドラインUIを作成するためのプラグイン(通知も変更)
+
 ### nvim-lspconfig
 https://github.com/neovim/nvim-lspconfig
 nvimのlspをラップして、configの設定を簡単にするプラグイン
