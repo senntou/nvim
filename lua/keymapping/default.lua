@@ -1,13 +1,27 @@
 -- 各プラグインのキーマップやターミナルのキーマップは、コンフィグファイルに記載してください
 -- ここに記載するのは、Vimのデフォルトのキーマップの設定です
 
+-- バッファを移動する関数
+function next_buffer()
+  vim.cmd(':bnext')
+  -- terminal がある場合は、terminal の次のバッファに移動する
+  if vim.bo.buftype == 'terminal' then
+    vim.cmd(':bnext')
+  end
+end
+function prev_buffer()
+  vim.cmd(':bprev')
+  -- terminal がある場合は、terminal の次のバッファに移動する
+  if vim.bo.buftype == 'terminal' then
+    vim.cmd(':bprev')
+  end
+end
 
-
--- :bnext and :bprev
-vim.keymap.set('n', '<C-\\><C-j>', function() vim.cmd(':bprev') end, { desc = 'Previous buffer' })
-vim.keymap.set('n', '<C-\\><C-h>', function() vim.cmd(':bprev') end, { desc = 'Previous buffer' })
-vim.keymap.set('n', '<C-\\><C-k>', function() vim.cmd(':bnext') end, { desc = 'Next buffer' })
-vim.keymap.set('n', '<C-\\><C-l>', function() vim.cmd(':bnext') end, { desc = 'Next buffer' })
+-- バッファの移動
+vim.keymap.set('n', '<C-\\><C-j>', prev_buffer, { desc = 'Previous buffer' })
+vim.keymap.set('n', '<C-\\><C-h>', prev_buffer, { desc = 'Previous buffer' })
+vim.keymap.set('n', '<C-\\><C-k>', next_buffer, { desc = 'Next buffer' })
+vim.keymap.set('n', '<C-\\><C-l>', next_buffer, { desc = 'Next buffer' })
 
 -- ctrl + hjkl
 vim.keymap.set('i', '<C-j>', '<Down>', { noremap = true })
