@@ -39,6 +39,10 @@ https://github.com/hrsh7th/nvim-cmp
 https://github.com/github/copilot.vim
 GitHub Copilot for Neovim
 
+### gitsigns.nvim
+https://github.com/lewis6991/gitsigns.nvim
+gitの変更を表示するためのプラグイン
+
 ### mason.nvim
 https://github.com/williamboman/mason.nvim
 LSPサーバーなどの外部ツールをインストールするためのプラグイン
