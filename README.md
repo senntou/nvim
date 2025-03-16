@@ -23,6 +23,10 @@
 ### lazy.nvim
 lazy.nvim is a modern plugin manager for Neovim.
 
+### auto-pairs
+https://github.com/jiangmiao/auto-pairs
+括弧などのペア記号を補完する
+
 ### bufferline.nvim
 https://github.com/akinsho/bufferline.nvim
 タブバーを追加するためのプラグイン
