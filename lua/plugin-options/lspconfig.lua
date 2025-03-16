@@ -9,6 +9,13 @@ require'lspconfig'.clangd.setup {
   }
 }
 
+-- typescript
+require"lspconfig".ts_ls.setup{
+  cmd = { "typescript-language-server", "--stdio" },
+  filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
+  root_dir = { "package.json", "tsconfig.json", ".git" }
+}
+
 -- auto format
 -- save時にvim.lsp.buf.format()を実行
 vim.api.nvim_create_autocmd("BufWritePre",{

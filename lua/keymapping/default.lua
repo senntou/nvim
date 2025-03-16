@@ -5,7 +5,9 @@
 
 -- :bnext and :bprev
 vim.keymap.set('n', '<C-\\><C-j>', function() vim.cmd(':bprev') end, { desc = 'Previous buffer' })
+vim.keymap.set('n', '<C-\\><C-h>', function() vim.cmd(':bprev') end, { desc = 'Previous buffer' })
 vim.keymap.set('n', '<C-\\><C-k>', function() vim.cmd(':bnext') end, { desc = 'Next buffer' })
+vim.keymap.set('n', '<C-\\><C-l>', function() vim.cmd(':bnext') end, { desc = 'Next buffer' })
 
 -- ctrl + hjkl
 vim.keymap.set('i', '<C-j>', '<Down>', { noremap = true })
