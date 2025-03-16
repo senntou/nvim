@@ -9,8 +9,8 @@ return {
     },
     
     -- キーマップ
-    -- 隠しファイルも表示する
     keys = {
+      -- 隠しファイルも含め、ファイル検索をして表示する
       {
         "<C-p>",
         function()
@@ -18,6 +18,20 @@ return {
             hidden = true,
           })
         end,
-      }
+      },
+      -- gitのブランチを表示する
+      {
+        "<C-\\><C-b>",
+        function()
+          require('telescope.builtin').git_branches()
+        end,
+      },
+      -- gitのステータスを表示する
+      {
+        "<C-G>",
+        function()
+          require('telescope.builtin').git_status()
+        end,
+      },
     }
 }
