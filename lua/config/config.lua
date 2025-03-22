@@ -16,6 +16,4 @@ vim.o.expandtab = true
 vim.o.smartindent = true
 
 -- cppファイルのコメントアウト
-vim.cmd[[ autocmd FileType cpp setlocal commentstring=//\ %s ]]
-
-
+vim.cmd [[ autocmd FileType cpp setlocal commentstring=//\ %s ]]

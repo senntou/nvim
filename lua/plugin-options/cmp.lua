@@ -1,4 +1,4 @@
-require'cmp'.setup {
+require 'cmp'.setup {
   sources = {
     { name = 'nvim_lsp' }
   }
@@ -10,5 +10,5 @@ local capabilities = require('cmp_nvim_lsp').default_capabilities()
 -- clangdのLSPを用いた補完を有効にする
 require('lspconfig').clangd.setup {
   capabilities = capabilities,
-  ...  -- other lspconfig configs
+  ... -- other lspconfig configs
 }

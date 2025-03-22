@@ -1,9 +1,9 @@
 -- lua
-require'lspconfig'.lua_ls.setup({
+require 'lspconfig'.lua_ls.setup({
   on_init = function(client)
     if client.workspace_folders then
       local path = client.workspace_folders[1].name
-      if path ~= vim.fn.stdpath('config') and (vim.loop.fs_stat(path..'/.luarc.json') or vim.loop.fs_stat(path..'/.luarc.jsonc')) then
+      if path ~= vim.fn.stdpath('config') and (vim.loop.fs_stat(path .. '/.luarc.json') or vim.loop.fs_stat(path .. '/.luarc.jsonc')) then
         return
       end
     end
@@ -35,25 +35,25 @@ require'lspconfig'.lua_ls.setup({
 
 -- C言語関連のLSPについての設定
 -- compile_commandsや.gitが無いプロジェクトでは動かない
-require'lspconfig'.clangd.setup {
+require 'lspconfig'.clangd.setup {
   cmd = { "clangd", "--background-index" },
   filetypes = { "c", "cpp", "objc", "objcpp" },
-  root_dir = require'lspconfig'.util.root_pattern("compile_commands.json", "compile_flags.txt", ".git"),
+  root_dir = require 'lspconfig'.util.root_pattern("compile_commands.json", "compile_flags.txt", ".git"),
   init_options = {
     clangdFileStatus = true
   }
 }
 
 -- typescript
-require"lspconfig".ts_ls.setup {
+require "lspconfig".ts_ls.setup {
   cmd = { "typescript-language-server", "--stdio" },
   filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
-  root_dir = require'lspconfig'.util.root_pattern("package.json", "tsconfig.json", ".git")
+  root_dir = require 'lspconfig'.util.root_pattern("package.json", "tsconfig.json", ".git")
 }
 
 -- auto format
 -- save時にvim.lsp.buf.format()を実行
-vim.api.nvim_create_autocmd("BufWritePre",{
+vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = "*",
   callback = function()
     vim.lsp.buf.format()

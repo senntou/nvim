@@ -2,17 +2,17 @@
 function leave_nerdtree()
   if vim.fn.winnr('$') > 1 and vim.fn.bufname('%'):match('NERD_tree_tab_%d+') then -- NERDTreeのバッファかつウィンドウが2つ以上ある場合
     vim.cmd("echo 'test'")
-    nerd_winnr = vim.fn.winnr() -- NERDTreeのウィンドウ番号を取得
-    next_winnr = nerd_winnr  % 2 + 1
-    buf = vim.api.nvim_list_wins()[next_winnr] -- 一番上のウィンドウに移動
+    nerd_winnr = vim.fn.winnr()                                                    -- NERDTreeのウィンドウ番号を取得
+    next_winnr = nerd_winnr % 2 + 1
+    buf = vim.api.nvim_list_wins()[next_winnr]                                     -- 一番上のウィンドウに移動
     vim.api.nvim_set_current_win(buf)
   end
 end
 
 --terminal
 function toggle_terminal()
-  local bufnr = vim.fn.bufnr('%')  -- 現在のバッファ番号を取得
-  local term_bufnr = nil -- ターミナルのバッファ番号
+  local bufnr = vim.fn.bufnr('%') -- 現在のバッファ番号を取得
+  local term_bufnr = nil          -- ターミナルのバッファ番号
 
   -- 既に開いているターミナルを探す
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
@@ -35,7 +35,7 @@ function toggle_terminal()
     vim.cmd("belowright split")
     vim.cmd("buffer " .. term_bufnr)
     vim.cmd("startinsert") -- ターミナルに入ったら挿入モードにする
-  else -- ターミナルが起動されていない（バッファが存在しない）場合
+  else                     -- ターミナルが起動されていない（バッファが存在しない）場合
     leave_nerdtree()
     vim.cmd("belowright split")
     vim.cmd("terminal")
