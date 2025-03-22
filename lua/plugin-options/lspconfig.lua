@@ -51,6 +51,13 @@ require "lspconfig".ts_ls.setup {
   root_dir = require 'lspconfig'.util.root_pattern("package.json", "tsconfig.json", ".git")
 }
 
+-- php intelephense
+require"lspconfig".intelephense.setup {
+  cmd = { "intelephense", "--stdio" },
+  filetypes = { "php" },
+  root_dir = require'lspconfig'.util.root_pattern("composer.json", ".git")
+}
+
 -- auto format
 -- save時にvim.lsp.buf.format()を実行
 vim.api.nvim_create_autocmd("BufWritePre", {

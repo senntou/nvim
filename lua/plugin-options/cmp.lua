@@ -12,3 +12,9 @@ require('lspconfig').clangd.setup {
   capabilities = capabilities,
   ... -- other lspconfig configs
 }
+
+
+require('lspconfig').intelephense.setup {
+  capabilities = capabilities,
+  ...  -- other lspconfig configs
+}
