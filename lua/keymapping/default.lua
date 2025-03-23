@@ -9,6 +9,7 @@ function next_buffer()
     vim.cmd(':bnext')
   end
 end
+
 function prev_buffer()
   vim.cmd(':bprev')
   -- terminal がある場合は、terminal の次のバッファに移動する
@@ -38,6 +39,16 @@ vim.keymap.set('c', '<Up>', '<C-p>', { noremap = true })
 
 -- split
 vim.keymap.set('n', '<C-w><C-l>', '<C-w>v', { noremap = true })
+
+-- 定義ジャンプ
+vim.api.nvim_create_autocmd("LspAttach", {
+  desc = "Attach key mappings for LSP functionalities",
+  callback = function()
+    vim.keymap.set('n', 'gd', '<cmd>:lua vim.lsp.buf.definition()<CR>')
+    vim.keymap.set('n', 'gr', '<cmd>:lua vim.lsp.buf.references()<CR>')
+    -- more mappings ...
+  end
+})
 
 -- terminal でのEscキーの挙動を変更
 -- vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })

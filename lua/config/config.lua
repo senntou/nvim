@@ -17,3 +17,6 @@ vim.o.smartindent = true
 
 -- cppファイルのコメントアウト
 vim.cmd [[ autocmd FileType cpp setlocal commentstring=//\ %s ]]
+
+-- xで削除した文字をクリップボードに保存しない
+vim.api.nvim_set_keymap("n", "x", '"_x', { noremap = true, silent = true })
