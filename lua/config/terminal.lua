@@ -1,7 +1,6 @@
 -- 現在のバッファがNERDTreeの場合、別のウィンドウ移動する
 function leave_nerdtree()
   if vim.fn.winnr('$') > 1 and vim.fn.bufname('%'):match('NERD_tree_tab_%d+') then -- NERDTreeのバッファかつウィンドウが2つ以上ある場合
-    vim.cmd("echo 'test'")
     nerd_winnr = vim.fn.winnr()                                                    -- NERDTreeのウィンドウ番号を取得
     next_winnr = nerd_winnr % 2 + 1
     buf = vim.api.nvim_list_wins()[next_winnr]                                     -- 一番上のウィンドウに移動
