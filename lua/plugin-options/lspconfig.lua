@@ -51,11 +51,11 @@ require "lspconfig".ts_ls.setup {
   root_dir = require 'lspconfig'.util.root_pattern("package.json", "tsconfig.json", ".git")
 }
 
--- php intelephense
-require"lspconfig".intelephense.setup {
-  cmd = { "intelephense", "--stdio" },
+-- php phpactor
+require "lspconfig".phpactor.setup {
+  cmd = { "phpactor", "language-server" },
   filetypes = { "php" },
-  root_dir = require'lspconfig'.util.root_pattern("composer.json", ".git")
+  root_dir = require 'lspconfig'.util.root_pattern("composer.json", ".git")
 }
 
 -- auto format

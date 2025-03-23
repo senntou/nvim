@@ -14,7 +14,7 @@ require('lspconfig').clangd.setup {
 }
 
 
-require('lspconfig').intelephense.setup {
+require('lspconfig').phpactor.setup {
   capabilities = capabilities,
-  ...  -- other lspconfig configs
+  ... -- other lspconfig configs
 }
