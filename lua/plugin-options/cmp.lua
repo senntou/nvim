@@ -7,6 +7,11 @@ require 'cmp'.setup {
 -- The nvim-cmp almost supports LSP's capabilities so You should advertise it to LSP servers..
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
+require('lspconfig').eslint.setup {
+  capabilities = capabilities,
+  ... -- other lspconfig configs
+}
+
 -- clangdのLSPを用いた補完を有効にする
 require('lspconfig').clangd.setup {
   capabilities = capabilities,

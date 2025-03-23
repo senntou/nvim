@@ -51,6 +51,12 @@ require "lspconfig".ts_ls.setup {
   root_dir = require 'lspconfig'.util.root_pattern("package.json", "tsconfig.json", ".git")
 }
 
+require "lspconfig".eslint.setup {
+  cmd = { "eslint_d", "--stdio" },
+  filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
+  root_dir = require 'lspconfig'.util.root_pattern("package.json", ".git")
+}
+
 -- php phpactor
 require "lspconfig".phpactor.setup {
   cmd = { "phpactor", "language-server" },

@@ -3,11 +3,11 @@ return {
   config = function()
     local null_ls = require("null-ls")
     local builtins = require("null-ls.builtins")
-    local sources = {
+    local phpstan = {
       builtins.diagnostics.phpstan
     }
     null_ls.setup {
-      sources = sources
+      sources = phpstan
     }
   end,
   dependencies = { "neovim/nvim-lspconfig" },
