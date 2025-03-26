@@ -2,7 +2,7 @@
 -- ここに記載するのは、Vimのデフォルトのキーマップの設定です
 
 -- バッファを移動する関数
-function next_buffer()
+function Next_buffer()
   vim.cmd(':bnext')
   -- terminal がある場合は、terminal の次のバッファに移動する
   if vim.bo.buftype == 'terminal' then
@@ -10,7 +10,7 @@ function next_buffer()
   end
 end
 
-function prev_buffer()
+function Prev_buffer()
   vim.cmd(':bprev')
   -- terminal がある場合は、terminal の次のバッファに移動する
   if vim.bo.buftype == 'terminal' then
@@ -19,10 +19,10 @@ function prev_buffer()
 end
 
 -- バッファの移動
-vim.keymap.set('n', '<C-\\><C-j>', prev_buffer, { desc = 'Previous buffer' })
-vim.keymap.set('n', '<C-\\><C-h>', prev_buffer, { desc = 'Previous buffer' })
-vim.keymap.set('n', '<C-\\><C-k>', next_buffer, { desc = 'Next buffer' })
-vim.keymap.set('n', '<C-\\><C-l>', next_buffer, { desc = 'Next buffer' })
+vim.keymap.set('n', '<C-\\><C-j>', Prev_buffer, { desc = 'Previous buffer' })
+vim.keymap.set('n', '<C-\\><C-h>', Prev_buffer, { desc = 'Previous buffer' })
+vim.keymap.set('n', '<C-\\><C-k>', Next_buffer, { desc = 'Next buffer' })
+vim.keymap.set('n', '<C-\\><C-l>', Next_buffer, { desc = 'Next buffer' })
 
 -- バッファの削除
 vim.keymap.set('n', '<C-\\><C-d>', ':bd<CR>', { desc = 'Delete buffer' })
@@ -40,15 +40,21 @@ vim.keymap.set('c', '<Up>', '<C-p>', { noremap = true })
 -- split
 vim.keymap.set('n', '<C-w><C-l>', '<C-w>v', { noremap = true })
 
--- 定義ジャンプ
+-- LSP関連のキーマップ
 vim.api.nvim_create_autocmd("LspAttach", {
   desc = "Attach key mappings for LSP functionalities",
   callback = function()
     vim.keymap.set('n', 'gd', '<cmd>:lua vim.lsp.buf.definition()<CR>')
     vim.keymap.set('n', 'gr', '<cmd>:lua vim.lsp.buf.references()<CR>')
     vim.keymap.set('n', 'gn', '<cmd>:lua vim.lsp.buf.rename()<CR>')
+    vim.keymap.set('n', 'ga', '<cmd>lua vim.lsp.buf.code_action()<CR>')
+    vim.keymap.set('n', 'gf', '<cmd>lua vim.diagnostic.open_float()<CR>')
+    vim.keymap.set('n', 'gk', '<cmd>lua vim.diagnostic.goto_prev()<CR>')
+    vim.keymap.set('n', 'gj', '<cmd>lua vim.diagnostic.goto_next()<CR>')
   end
 })
 
 -- terminal でのEscキーの挙動を変更
+-- vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })
+-- vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })
 -- vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })
