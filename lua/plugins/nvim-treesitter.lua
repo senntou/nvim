@@ -1,4 +1,25 @@
 return {
-    "nvim-treesitter/nvim-treesitter",
-    run = ":TSUpdate",
+  "nvim-treesitter/nvim-treesitter",
+  main = "nvim-treesitter.configs",
+  opts = {
+    ensure_installed = "typescript",
+    "javascript",
+    "lua",
+    "json",
+    "html",
+    "css",
+    "scss",
+    "yaml",
+    "dockerfile",
+    "go",
+    "tsx",
+    "jsx",
+    "scss",
+    "graphql",
+    "jsonc",
+    highlight = {
+      enable = true,
+    },
+  },
+  run = ":TSUpdate",
 }

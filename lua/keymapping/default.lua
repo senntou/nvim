@@ -56,5 +56,3 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 -- terminal でのEscキーの挙動を変更
 -- vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })
--- vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })
--- vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })

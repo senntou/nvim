@@ -34,5 +34,12 @@ return {
         require('telescope.builtin').git_status()
       end,
     },
+    -- 文字列検索をして表示する
+    {
+      "<C-f>",
+      function()
+        require('telescope.builtin').live_grep()
+      end,
+    },
   }
 }
