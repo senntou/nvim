@@ -46,7 +46,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
   callback = function()
     vim.keymap.set('n', 'gd', '<cmd>:lua vim.lsp.buf.definition()<CR>')
     vim.keymap.set('n', 'gr', '<cmd>:lua vim.lsp.buf.references()<CR>')
-    -- more mappings ...
+    vim.keymap.set('n', 'gn', '<cmd>:lua vim.lsp.buf.rename()<CR>')
   end
 })
 
