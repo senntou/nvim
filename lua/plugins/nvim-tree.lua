@@ -1,7 +1,9 @@
 return {
   "nvim-tree/nvim-tree.lua",
   config = function()
-    require('nvim-tree').setup()
+    require('nvim-tree').setup({
+      disable_netrw = true,
+    })
 
     function NvimTreeToggleOrFindFile()
       local api = require('nvim-tree.api')
