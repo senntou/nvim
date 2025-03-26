@@ -20,7 +20,6 @@ vim.opt.rtp:prepend(lazypath)
 if not vim.g.vscode then
   require("lazy").setup("plugins")
   require("colorscheme")
-  require("plugin-options.bufferline")
   require("plugin-options.telescope")
   require("plugin-options.transparent")
   require("plugin-options.treesitter")

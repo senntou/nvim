@@ -1,5 +1,8 @@
 return {
   'akinsho/bufferline.nvim',
+  init = function()
+    vim.opt.termguicolors = true
+  end,
   opts = {
     options = {
 
