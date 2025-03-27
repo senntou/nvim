@@ -54,5 +54,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end
 })
 
+-- qキーでマクロ設定の無効化
+vim.api.nvim_set_keymap('n', 'q', ':echo "Macro is disabled"<CR>', { noremap = true, silent = false })
+vim.api.nvim_set_keymap('n', 'Q', ':echo "Macro is disabled"<CR>', { noremap = true, silent = false })
+vim.api.nvim_set_keymap('n', '@', '<Nop>', { noremap = true, silent = false })
+
 -- terminal でのEscキーの挙動を変更
 -- vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })
