@@ -3,6 +3,7 @@ return {
   config = function()
     require('nvim-tree').setup({
       disable_netrw = true,
+      hijack_cursor = true,
     })
 
     function NvimTreeToggleOrFindFile()
