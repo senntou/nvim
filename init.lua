@@ -23,8 +23,8 @@ if not vim.g.vscode then
   require("plugin-options.lspconfig")
 end
 
-require("keymapping.default")
 require("commands")
+require("keymapping.default")
 
 -- local vimrcを読み込む設定
 local function load_local_vimrc()

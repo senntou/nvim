@@ -25,7 +25,8 @@ vim.keymap.set('n', '<C-\\><C-k>', Next_buffer, { desc = 'Next buffer' })
 vim.keymap.set('n', '<C-\\><C-l>', Next_buffer, { desc = 'Next buffer' })
 
 -- バッファの削除
-vim.keymap.set('n', '<C-\\><C-d>', ':bd<CR>', { desc = 'Delete buffer' })
+vim.keymap.set('n', '<C-\\><C-d>', ':lua Bdelete()<CR>', { desc = 'Delete buffer' })
+vim.keymap.set('n', '<leader>bd', ':lua Bdelete()<CR>', { desc = 'Delete buffer' })
 
 -- ctrl + hjkl
 vim.keymap.set('i', '<C-j>', '<Down>', { noremap = true })
