@@ -21,7 +21,6 @@ if not vim.g.vscode then
   require("lazy").setup("plugins")
   require("colorscheme")
   require("plugin-options.lspconfig")
-  require("plugin-options.cmp")
 end
 
 require("keymapping.default")
