@@ -27,6 +27,12 @@ return {
         require('telescope.builtin').git_branches()
       end,
     },
+    {
+      "<C-_><C-b>",
+      function()
+        require('telescope.builtin').git_branches()
+      end,
+    },
     -- gitのステータスを表示する
     {
       "<C-G>",
