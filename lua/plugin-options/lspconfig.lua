@@ -36,8 +36,16 @@ require "lspconfig".cssls.setup {
 }
 
 -- php phpactor
-require "lspconfig".phpactor.setup {
-  cmd = { "phpactor", "language-server" },
+-- require "lspconfig".phpactor.setup {
+--   cmd = { "phpactor", "language-server" },
+--   filetypes = { "php" },
+--   root_dir = require 'lspconfig'.util.root_pattern("composer.json", ".git"),
+--   capabilities = capabilities
+-- }
+
+-- php intelephense
+require "lspconfig".intelephense.setup {
+  cmd = { "intelephense", "--stdio" },
   filetypes = { "php" },
   root_dir = require 'lspconfig'.util.root_pattern("composer.json", ".git"),
   capabilities = capabilities
