@@ -1,6 +1,7 @@
 return {
   "hrsh7th/nvim-cmp",
   config = function()
+    local lspkind = require("lspkind")
     local cmp = require("cmp")
     local types = require('cmp.types')
     vim.opt.completeopt = { "menu", "menuone", "noselect" }
@@ -17,6 +18,19 @@ return {
         { name = "buffer" },
         { name = "path" },
       }),
+
+      formatting = {
+        format = lspkind.cmp_format({
+          mode = 'symbol_text',
+          menu = ({
+            buffer = "[Buffer]",
+            nvim_lsp = "[LSP]",
+            copilot = "[Copilot]",
+            nvim_lua = "[Lua]",
+            latex_symbols = "[Latex]",
+          }),
+        }),
+      },
     })
   end
 }
