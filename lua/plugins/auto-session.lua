@@ -7,6 +7,11 @@ return {
   ---@type AutoSession.Config
   opts = {
     suppressed_dirs = { '~/', '~/Projects', '~/Downloads', '/' },
-    -- log_level = 'debug',
-  }
+    bypass_save_filetypes = { 'alpha' }
+  },
+
+  config = function(opts)
+    require('auto-session').setup(opts)
+    vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,localoptions"
+  end
 }

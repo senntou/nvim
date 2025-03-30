@@ -9,15 +9,8 @@ vim.cmd([[command! Bufname echo bufname('%')]])
 -- バッファを閉じる
 -- バッファを閉じた後は、一つ前のバッファに移動する
 function Bdelete()
-  -- local prev_bufnr = vim.fn.bufnr('#')
   local buf_list = vim.fn.getbufinfo({ buflisted = 1 })
   local current_bufnr = vim.fn.bufnr('%')
-
-  -- if vim.fn.buflisted(prev_bufnr) ~= 0 then
-  --   vim.cmd('buffer #')
-  --   vim.cmd('bdelete ' .. current_bufnr)
-  --   return
-  -- end
 
   local current_idx = 0
   for idx, buf in ipairs(buf_list) do
@@ -27,9 +20,9 @@ function Bdelete()
     end
   end
 
-  local next_idx = current_idx - 1
-  if next_idx < 1 then
-    next_idx = #buf_list
+  local next_idx = (current_idx + #buf_list - 2) % #buf_list + 1
+  while vim.api.nvim_buf_get_option(buf_list[next_idx].bufnr, 'buftype') == 'terminal' do
+    next_idx = (next_idx + #buf_list - 2) % #buf_list + 1
   end
 
   local next_bufnr = buf_list[next_idx].bufnr
