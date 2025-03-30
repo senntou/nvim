@@ -42,7 +42,7 @@ return {
     },
     -- 文字列検索をして表示する
     {
-      "<C-f>",
+      "<C-o>",
       function()
         require('telescope.builtin').live_grep()
       end,
