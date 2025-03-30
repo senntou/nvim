@@ -21,10 +21,16 @@ require "lspconfig".ts_ls.setup {
   capabilities = capabilities
 }
 require "lspconfig".eslint.setup {
-  cmd = { "eslint_d", "--stdio" },
   filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
   root_dir = require 'lspconfig'.util.root_pattern("package.json", ".git"),
-  capabilities = capabilities
+  capabilities = capabilities,
+
+  on_attach = function(client, bufnr)
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      buffer = bufnr,
+      command = "EslintFixAll",
+    })
+  end,
 }
 
 -- css
