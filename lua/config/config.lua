@@ -2,6 +2,10 @@
 vim.o.encoding = "utf-8"
 vim.o.fileencoding = "utf-8"
 
+if vim.fn.has("mac") == 1 then
+  vim.g.mapleader = "_"
+end
+
 -- clipboard
 vim.o.clipboard = "unnamedplus"
 
