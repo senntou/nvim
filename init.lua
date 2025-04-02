@@ -1,6 +1,10 @@
 require("config.config")
 require("config.terminal")
 
+if vim.fn.has("mac") == 1 then
+  require("config.mac_preload")
+end
+
 vim.cmd [[let g:python3_host_prog = 'C:\Users\watar\AppData\Local\Programs\Python\Python312\python.exe']]
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -25,6 +29,9 @@ end
 
 require("commands")
 require("keymapping.default")
+if vim.fn.has("mac") == 1 then
+  require("config.mac")
+end
 
 -- local vimrcを読み込む設定
 local function load_local_vimrc()
