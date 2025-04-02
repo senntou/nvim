@@ -1,6 +1,8 @@
 return {
-  "zbirenbaum/copilot-cmp",
-  config = function ()
-    require("copilot_cmp").setup()
-  end
+  "github/copilot.vim",
+  -- "zbirenbaum/copilot-cmp",
+  -- enabled = false,
+  -- config = function()
+  --   require("copilot_cmp").setup()
+  -- end
 }
