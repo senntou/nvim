@@ -53,8 +53,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.keymap.set('n', 'gd', '<cmd>:lua vim.lsp.buf.definition()<CR>')
     vim.keymap.set('n', 'gr', '<cmd>:lua vim.lsp.buf.references()<CR>')
     vim.keymap.set('n', 'gn', '<cmd>:lua vim.lsp.buf.rename()<CR>')
-    vim.keymap.set('n', 'ga', '<cmd>lua vim.lsp.buf.code_action()<CR>')
-    vim.api.nvim_set_keymap('n', 'gf', '<cmd>lua vim.diagnostic.open_float<CR>',
+    vim.keymap.set('n', 'ga', '<cmd>:lua vim.lsp.buf.code_action()<CR>')
+    vim.api.nvim_set_keymap('n', 'gf', '<cmd>:lua vim.diagnostic.open_float()<CR>',
       { noremap = true, silent = true, desc = 'Open Float' })
     vim.api.nvim_set_keymap('n', '<leader>fm', '<cmd>lua vim.buf.lsp.format()<CR>',
       { noremap = true, silent = true, desc = 'Format' })
