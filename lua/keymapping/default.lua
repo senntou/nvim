@@ -1,28 +1,12 @@
 -- 各プラグインのキーマップやターミナルのキーマップは、コンフィグファイルに記載してください
 -- ここに記載するのは、Vimのデフォルトのキーマップの設定です
 
--- バッファを移動する関数
-function Next_buffer()
-  vim.cmd(':bnext')
-  -- terminal がある場合は、terminal の次のバッファに移動する
-  if vim.bo.buftype == 'terminal' then
-    vim.cmd(':bnext')
-  end
-end
-
-function Prev_buffer()
-  vim.cmd(':bprev')
-  -- terminal がある場合は、terminal の次のバッファに移動する
-  if vim.bo.buftype == 'terminal' then
-    vim.cmd(':bprev')
-  end
-end
 
 -- バッファの移動
-vim.keymap.set('n', '<C-\\><C-j>', Prev_buffer, { desc = 'Previous buffer' })
-vim.keymap.set('n', '<C-\\><C-h>', Prev_buffer, { desc = 'Previous buffer' })
-vim.keymap.set('n', '<C-\\><C-k>', Next_buffer, { desc = 'Next buffer' })
-vim.keymap.set('n', '<C-\\><C-l>', Next_buffer, { desc = 'Next buffer' })
+vim.keymap.set('n', '<C-\\><C-j>', PrevBuffer, { desc = 'Previous buffer' })
+vim.keymap.set('n', '<C-\\><C-h>', PrevBuffer, { desc = 'Previous buffer' })
+vim.keymap.set('n', '<C-\\><C-k>', NextBuffer, { desc = 'Next buffer' })
+vim.keymap.set('n', '<C-\\><C-l>', NextBuffer, { desc = 'Next buffer' })
 
 -- バッファの削除
 vim.keymap.set('n', '<C-\\><C-d>', ':lua Bdelete()<CR>', { desc = 'Delete buffer' })

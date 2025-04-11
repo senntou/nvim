@@ -6,6 +6,24 @@ vim.cmd([[command! -nargs=1 -complete=help H help <args> | only]])
 -- バッファ名を表示する
 vim.cmd([[command! Bufname echo bufname('%')]])
 
+
+-- バッファを移動する関数
+function NextBuffer()
+  vim.cmd(':bnext')
+  -- terminal がある場合は、terminal の次のバッファに移動する
+  if vim.bo.buftype == 'terminal' then
+    vim.cmd(':bnext')
+  end
+end
+
+function PrevBuffer()
+  vim.cmd(':bprev')
+  -- terminal がある場合は、terminal の次のバッファに移動する
+  if vim.bo.buftype == 'terminal' then
+    vim.cmd(':bprev')
+  end
+end
+
 -- バッファを閉じる
 -- バッファを閉じた後は、一つ前のバッファに移動する
 function Bdelete()
