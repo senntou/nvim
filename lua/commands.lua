@@ -39,7 +39,7 @@ function Bdelete()
   end
 
   local next_idx = (current_idx + #buf_list - 2) % #buf_list + 1
-  while vim.api.nvim_buf_get_option(buf_list[next_idx].bufnr, 'buftype') == 'terminal' do
+  while vim.api.nvim_get_option_value('buftype', { buf = buf_list[next_idx].bufnr }) == 'terminal' do
     next_idx = (next_idx + #buf_list - 2) % #buf_list + 1
   end
 
