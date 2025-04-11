@@ -23,21 +23,10 @@ vim.keymap.set('n', '<C-\\><C-j>', Prev_buffer, { desc = 'Previous buffer' })
 vim.keymap.set('n', '<C-\\><C-h>', Prev_buffer, { desc = 'Previous buffer' })
 vim.keymap.set('n', '<C-\\><C-k>', Next_buffer, { desc = 'Next buffer' })
 vim.keymap.set('n', '<C-\\><C-l>', Next_buffer, { desc = 'Next buffer' })
-vim.keymap.set('n', '<C-_><C-j>', Prev_buffer, { desc = 'Previous buffer' })
-vim.keymap.set('n', '<C-_><C-h>', Prev_buffer, { desc = 'Previous buffer' })
-vim.keymap.set('n', '<C-_><C-k>', Next_buffer, { desc = 'Next buffer' })
-vim.keymap.set('n', '<C-_><C-l>', Next_buffer, { desc = 'Next buffer' })
 
 -- バッファの削除
 vim.keymap.set('n', '<C-\\><C-d>', ':lua Bdelete()<CR>', { desc = 'Delete buffer' })
-vim.keymap.set('n', '<C-_><C-d>', ':lua Bdelete()<CR>', { desc = 'Delete buffer' })
 vim.keymap.set('n', '<leader>bd', ':lua Bdelete()<CR>', { desc = 'Delete buffer' })
-
--- ctrl + hjkl
-vim.keymap.set('i', '<C-j>', '<Down>', { noremap = true })
-vim.keymap.set('i', '<C-k>', '<Up>', { noremap = true })
-vim.keymap.set('i', '<C-h>', '<Left>', { noremap = true })
-vim.keymap.set('i', '<C-l>', '<Right>', { noremap = true })
 
 -- command line での補完を上下キーで選択する
 vim.keymap.set('c', '<Down>', '<C-n>', { noremap = true })
