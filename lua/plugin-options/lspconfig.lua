@@ -33,6 +33,12 @@ require "lspconfig".eslint.setup {
   end,
 }
 
+-- python pyright
+require "lspconfig".pyright.setup {
+  root_dir = require 'lspconfig'.util.root_pattern(".git"),
+  capabilities = capabilities,
+}
+
 -- css
 require "lspconfig".cssls.setup {
   cmd = { "vscode-css-language-server", "--stdio" },
