@@ -6,6 +6,7 @@ return {
     local sources = {
       builtins.diagnostics.phpstan,
       builtins.formatting.prettier,
+      builtins.formatting.black,
     }
     null_ls.setup {
       sources = sources,
