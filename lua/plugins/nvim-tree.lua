@@ -4,6 +4,9 @@ return {
     require('nvim-tree').setup({
       disable_netrw = true,
       hijack_cursor = true,
+      filters = {
+        git_ignored = false,
+      }
     })
 
     function NvimTreeToggleOrFindFile()
