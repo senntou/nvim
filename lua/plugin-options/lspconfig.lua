@@ -38,6 +38,11 @@ require "lspconfig".pyright.setup {
   root_dir = require 'lspconfig'.util.root_pattern(".git"),
   capabilities = capabilities,
 }
+-- python ruff
+require "lspconfig".ruff.setup {
+  root_dir = require 'lspconfig'.util.root_pattern("ruff.toml", ".git"),
+  capabilities = capabilities,
+}
 
 -- css
 require "lspconfig".cssls.setup {
