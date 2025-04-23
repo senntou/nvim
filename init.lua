@@ -24,7 +24,7 @@ vim.opt.rtp:prepend(lazypath)
 if not vim.g.vscode then
   require("lazy").setup("plugins")
   require("colorscheme")
-  require("plugin-options.lspconfig")
+  require("lsp.lsp")
 end
 
 require("commands")
