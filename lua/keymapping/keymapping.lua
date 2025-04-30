@@ -41,6 +41,12 @@ vim.api.nvim_set_keymap('n', 'q', '<C-w>', { noremap = true, silent = false })
 vim.api.nvim_set_keymap('n', 'Q', ':echo "Macro is disabled"<CR>', { noremap = true, silent = false })
 vim.api.nvim_set_keymap('n', '@', '<Nop>', { noremap = true, silent = false })
 
+-- resize window
+vim.api.nvim_set_keymap('n', '<C-Up>', '<cmd>vertical resize +4<CR>',
+  { noremap = true, silent = true, desc = 'Resize left' })
+vim.api.nvim_set_keymap('n', '<C-Down>', '<cmd>vertical resize -4<CR>',
+  { noremap = true, silent = true, desc = 'Resize right' })
+
 -- Neovimを終了する
 vim.api.nvim_set_keymap('n', '<leader>q', '<cmd>:qa<CR>', { noremap = true, silent = true, desc = 'Quit Neovim' })
 
