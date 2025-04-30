@@ -1,5 +1,7 @@
 return {
   "yetone/avante.nvim",
+  -- TODO: commit ID の指定を外す
+  commit = "f9aa75459d403d9e963ef2647c9791e0dfc9e5f9",
   event = "VeryLazy",
   version = false, -- Never set this value to "*"! Never!
   opts = {
@@ -17,9 +19,9 @@ return {
     "MunifTanjim/nui.nvim",
     --- The below dependencies are optional,
     "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
-    "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
-    "zbirenbaum/copilot.lua", -- for providers='copilot'
-    "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
+    "hrsh7th/nvim-cmp",              -- autocompletion for avante commands and mentions
+    "zbirenbaum/copilot.lua",        -- for providers='copilot'
+    "nvim-tree/nvim-web-devicons",   -- or echasnovski/mini.icons
     -- "echasnovski/mini.pick", -- for file_selector provider mini.pick
     -- "ibhagwan/fzf-lua", -- for file_selector provider fzf
     {
