@@ -1,7 +1,16 @@
 return {
   "nvim-tree/nvim-tree.lua",
   config = function()
+    local function my_on_attach(bufnr)
+      local api = require('nvim-tree.api')
+
+      -- Default mappings
+      api.config.mappings.default_on_attach(bufnr)
+      vim.keymap.del('n', 'q', { buffer = bufnr }) -- Disable the default 'q' mapping
+    end
+
     require('nvim-tree').setup({
+      on_attach = my_on_attach,
       disable_netrw = true,
       hijack_cursor = true,
       filters = {

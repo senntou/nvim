@@ -37,7 +37,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 })
 
 -- qキーでマクロ設定の無効化
-vim.api.nvim_set_keymap('n', 'q', ':echo "Macro is disabled"<CR>', { noremap = true, silent = false })
+vim.api.nvim_set_keymap('n', 'q', '<C-w>', { noremap = true, silent = false })
 vim.api.nvim_set_keymap('n', 'Q', ':echo "Macro is disabled"<CR>', { noremap = true, silent = false })
 vim.api.nvim_set_keymap('n', '@', '<Nop>', { noremap = true, silent = false })
 
