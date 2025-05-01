@@ -33,11 +33,5 @@ return {
       end,
       desc = "toggle Diffview"
     },
-    {
-      "q",
-      "<cmd>DiffviewClose<cr>",
-      desc = "Close Diffview",
-    }
   },
-
 }
