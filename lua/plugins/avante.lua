@@ -1,7 +1,7 @@
 return {
   "yetone/avante.nvim",
   -- TODO: commit ID の指定を外す
-  commit = "f9aa75459d403d9e963ef2647c9791e0dfc9e5f9",
+  -- commit = "f9aa75459d403d9e963ef2647c9791e0dfc9e5f9",
   event = "VeryLazy",
   version = false, -- Never set this value to "*"! Never!
   opts = {
