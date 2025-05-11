@@ -1,5 +1,6 @@
 return {
   "nvim-tree/nvim-tree.lua",
+  lazy = true,
   config = function()
     local function my_on_attach(bufnr)
       local api = require('nvim-tree.api')
@@ -26,7 +27,9 @@ return {
         vim.cmd('NvimTreeFindFile')
       end
     end
+  end,
 
-    vim.api.nvim_set_keymap("n", "<C-n>", '<cmd>:lua NvimTreeToggleOrFindFile()<CR>', { noremap = true, silent = true })
-  end
+  keys = {
+    { "<C-n>", "<cmd>:lua NvimTreeToggleOrFindFile()<CR>", desc = "Toggle NvimTree" },
+  }
 }
