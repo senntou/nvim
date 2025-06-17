@@ -7,6 +7,9 @@ vim.keymap.set('n', '<C-\\><C-j>', PrevBuffer, { desc = 'Previous buffer' })
 vim.keymap.set('n', '<C-\\><C-h>', PrevBuffer, { desc = 'Previous buffer' })
 vim.keymap.set('n', '<C-\\><C-k>', NextBuffer, { desc = 'Next buffer' })
 vim.keymap.set('n', '<C-\\><C-l>', NextBuffer, { desc = 'Next buffer' })
+vim.keymap.set('n', 'zh', PrevBuffer, { desc = 'Previous buffer' })
+vim.keymap.set('n', 'zl', NextBuffer, { desc = 'Next buffer' })
+vim.keymap.set('n', 'zd', ':lua Bdelete()<CR>', { desc = 'Delete buffer' })
 
 -- バッファの削除
 vim.keymap.set('n', '<C-\\><C-d>', ':lua Bdelete()<CR>', { desc = 'Delete buffer' })

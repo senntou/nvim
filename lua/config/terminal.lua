@@ -54,3 +54,6 @@ vim.api.nvim_set_keymap('t', '<C-\\><C-t>', '<cmd>lua toggle_terminal()<CR>', { 
 vim.api.nvim_set_keymap('n', '<C-_><C-t>', '<cmd>lua toggle_terminal()<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('i', '<C-_><C-t>', '<cmd>lua toggle_terminal()<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('t', '<C-_><C-t>', '<cmd>lua toggle_terminal()<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>zt', '<cmd>lua toggle_terminal()<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('i', '<leader>zt', '<cmd>lua toggle_terminal()<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('t', '<leader>zt', '<cmd>lua toggle_terminal()<CR>', { noremap = true, silent = true })
