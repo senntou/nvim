@@ -22,7 +22,9 @@ vim.opt.rtp:prepend(lazypath)
 
 -- vscodeからNeovimを開いた場合は、プラグインを使用しない
 if not vim.g.vscode then
-  require("lazy").setup("plugins")
+  require("lazy").setup("plugins", {
+    root = "/tmp/wkanegae/nvim-lazy",
+  })
   require("colorscheme")
   require("lsp.lsp")
 end
