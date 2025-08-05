@@ -22,6 +22,9 @@ vim.keymap.set('c', '<Up>', '<C-p>', { noremap = true })
 -- split
 vim.keymap.set('n', '<C-w><C-l>', '<C-w>v', { noremap = true })
 
+-- ファイルパスをコピーする
+vim.keymap.set('n', '<leader>y', ':let @+ = expand("%:.")<CR>', {noremap = true, desc = 'Copy file path to clipboard'})
+
 -- LSP関連のキーマップ
 vim.api.nvim_create_autocmd("LspAttach", {
   desc = "Attach key mappings for LSP functionalities",
