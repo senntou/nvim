@@ -7,7 +7,8 @@ end
 
 vim.cmd [[let g:python3_host_prog = 'C:\Users\watar\AppData\Local\Programs\Python\Python312\python.exe']]
 
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+-- local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+local lazypath = "/mnt/ssd/.nvim/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   vim.fn.system({
     "git",
@@ -23,7 +24,8 @@ vim.opt.rtp:prepend(lazypath)
 -- vscodeからNeovimを開いた場合は、プラグインを使用しない
 if not vim.g.vscode then
   require("lazy").setup("plugins", {
-    root = "/tmp/wkanegae/nvim-lazy",
+    -- root = "/tmp/wkanegae/nvim-lazy",
+    root = "/mnt/ssd/.nvim/nvim-plugs",
   })
   require("colorscheme")
   require("lsp.lsp")
