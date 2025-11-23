@@ -47,6 +47,9 @@ vim.api.nvim_set_keymap('n', 'q', '<C-w>', { noremap = true, silent = false })
 vim.api.nvim_set_keymap('n', 'Q', '<C-w>', { noremap = true, silent = false })
 vim.api.nvim_set_keymap('n', '@', '<Nop>', { noremap = true, silent = false })
 
+-- 次の単語検索
+vim.keymap.set("n", "*", "*``", { noremap = true, silent = true })
+
 -- resize window
 vim.api.nvim_set_keymap('n', '<C-Up>', '<cmd>vertical resize +4<CR>',
   { noremap = true, silent = true, desc = 'Resize left' })
