@@ -59,6 +59,14 @@ vim.api.nvim_set_keymap('n', '<C-Down>', '<cmd>vertical resize -4<CR>',
 -- Neovimを終了する
 vim.api.nvim_set_keymap('n', '<leader>q', '<cmd>:qa<CR>', { noremap = true, silent = true, desc = 'Quit Neovim' })
 
+-- 単語をまとめて置換
+vim.keymap.set(
+  "n",
+  "vig",
+  ":.,$s/\\<<C-r><C-w>\\>//gc<Left><Left><Left>",
+  { noremap = true, silent = false }
+)
+
 
 -- terminal でのEscキーの挙動を変更
 -- vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })
