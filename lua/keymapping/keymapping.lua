@@ -67,6 +67,9 @@ vim.keymap.set(
   { noremap = true, silent = false }
 )
 
+-- insert mode で Ctrl + l で Escape
+vim.keymap.set('i', '<C-l>', '<Esc>', { noremap = true })
+
 
 -- terminal でのEscキーの挙動を変更
 -- vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })
