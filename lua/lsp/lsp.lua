@@ -1,12 +1,13 @@
-vim.lsp.enable('clangd')
-vim.lsp.enable('ts_ls')
-vim.lsp.enable('eslint')
-vim.lsp.enable('pyright')
-vim.lsp.enable('ruff')
-vim.lsp.enable('cssls')
+-- :h lspconfig-all で利用可能なLSPサーバーの一覧を確認できる
+-- vim.lsp.enable('clangd')
+-- vim.lsp.enable('ts_ls')
+-- vim.lsp.enable('eslint')
+-- vim.lsp.enable('pyright')
+-- vim.lsp.enable('ruff')
+-- vim.lsp.enable('cssls')
 -- vim.lsp.enable('phpactor')
-vim.lsp.enable('intelephense')
-vim.lsp.enable('lua_ls')
+-- vim.lsp.enable('intelephense')
+-- vim.lsp.enable('lua_ls')
 
 -- auto format
 -- save時にvim.lsp.buf.format()を実行
