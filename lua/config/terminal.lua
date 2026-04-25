@@ -45,9 +45,6 @@ end
 -- キーマッピングを設定（<C-Space> でトグル）
 -- windows terminal環境では、この設定でC-@にマッピングされる
 -- 他の環境では未検証
-vim.api.nvim_set_keymap('n', '<C-Space>', '<cmd>lua toggle_terminal()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('i', '<C-Space>', '<cmd>lua toggle_terminal()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('t', '<C-Space>', '<cmd>lua toggle_terminal()<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<C-\\><C-t>', '<cmd>lua toggle_terminal()<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('i', '<C-\\><C-t>', '<cmd>lua toggle_terminal()<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('t', '<C-\\><C-t>', '<cmd>lua toggle_terminal()<CR>', { noremap = true, silent = true })

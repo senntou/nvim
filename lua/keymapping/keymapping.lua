@@ -47,7 +47,7 @@ vim.api.nvim_set_keymap('n', 'q', '<C-w>', { noremap = true, silent = false })
 vim.api.nvim_set_keymap('n', 'Q', '<C-w>', { noremap = true, silent = false })
 vim.api.nvim_set_keymap('n', '@', '<Nop>', { noremap = true, silent = false })
 
--- 次の単語検索
+-- *キーで検索時、今の位置に戻るように
 vim.keymap.set("n", "*", "*``", { noremap = true, silent = true })
 
 -- resize window
