@@ -8,6 +8,7 @@ return {
       -- Default mappings
       api.config.mappings.default_on_attach(bufnr)
       vim.keymap.del('n', 'q', { buffer = bufnr }) -- Disable the default 'q' mapping
+      vim.keymap.del('n', 'L', { buffer = bufnr }) -- Disable the default 'L' mapping
     end
 
     require('nvim-tree').setup({

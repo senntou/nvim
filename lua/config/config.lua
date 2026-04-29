@@ -17,6 +17,9 @@ vim.o.softtabstop = 2
 vim.o.expandtab = true
 vim.o.smartindent = true
 
+-- スクロール
+vim.o.scrolloff = 6
+
 -- cppファイルのコメントアウト
 -- luaで書き直す
 vim.api.nvim_create_autocmd("FileType", {
