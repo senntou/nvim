@@ -21,7 +21,7 @@ return {
   cmd = { "CsvViewEnable", "CsvViewDisable", "CsvViewToggle" },
   keys = {
     {
-      "<leader>c",
+      "<leader>cv",
       ":CsvViewToggle delimiter=, display_mode=border header_lnum=1<CR>",
       mode = { "n" },
     },
