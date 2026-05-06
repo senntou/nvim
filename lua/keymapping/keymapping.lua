@@ -75,4 +75,5 @@ vim.keymap.set('i', '<C-l>', '<Esc>', { noremap = true })
 
 
 -- terminal でのEscキーの挙動を変更
--- vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })
+vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })
+
