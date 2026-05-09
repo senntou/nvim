@@ -1,6 +1,7 @@
 return {
     "tetsuya28/memo.nvim",
     dependencies = { "nvim-telescope/telescope.nvim" },
+    cmd = { "MemoList", "MemoLatest" },
     config = function()
         local memo = require("memo")
         local save_dir = vim.fn.expand("$HOME/.nvim/memos")
