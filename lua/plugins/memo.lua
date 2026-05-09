@@ -19,7 +19,9 @@ return {
                 local name = vim.api.nvim_buf_get_name(ev.buf)
                 if name:find(save_dir, 1, true) and name:match("%.md$") then
                     vim.keymap.set("n", "q", "<cmd>silent! write<cr><cmd>close<cr>", { buffer = ev.buf, nowait = true })
-                    vim.api.nvim_win_set_option(0, "number", true)
+                    vim.schedule(function()
+                        vim.api.nvim_win_set_option(0, "number", true)
+                    end)
                 end
             end,
         })
