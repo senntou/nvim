@@ -5,6 +5,7 @@ return {
     config = function()
         local memo = require("memo")
         local save_dir = vim.fn.expand("$HOME/.nvim/memos")
+        vim.fn.mkdir(save_dir, "p")
 
         memo.setup({
             save_dir = save_dir,
