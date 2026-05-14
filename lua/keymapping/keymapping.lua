@@ -74,6 +74,12 @@ vim.keymap.set(
 vim.keymap.set('i', '<C-l>', '<Esc>', { noremap = true })
 
 
--- terminal でのEscキーの挙動を変更
-vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })
+-- terminal でのEscキーの挙動を変更（lazygitバッファを除く）
+vim.api.nvim_create_autocmd("TermOpen", {
+  callback = function()
+    if not vim.api.nvim_buf_get_name(0):match("lazygit") then
+      vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true, buffer = 0 })
+    end
+  end,
+})
 
