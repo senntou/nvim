@@ -9,7 +9,7 @@ return {
                 highlight = { fg = "#00ffff", bold = true },
                 dim       = { fg = "#555555" },
             },
-            index_chars = 'qwertyuiopasdfghjkl;zxcvbnm,./',
+            index_chars = 'qazwsxedcrfvtgbyhnujmik,ol.p;/',
             row_stride = 1,
             col_stride = 2,
             fill_stride_gaps = true,
