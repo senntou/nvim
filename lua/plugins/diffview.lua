@@ -4,10 +4,31 @@ return {
     enhanced_diff_hl = false,
     keymaps = {
       disable_default = true,
+      view = {
+        { "n", "L", false },
+      },
+      diff1 = {
+        { "n", "L", false },
+      },
+      diff2 = {
+        { "n", "L", false },
+      },
+      diff3 = {
+        { "n", "L", false },
+      },
+      diff4 = {
+        { "n", "L", false },
+      },
+      file_panel = {
+        { "n", "L", false },
+      },
+      file_history_panel = {
+        { "n", "L", false },
+      },
     },
   },
 
-  config = function(opts)
+  config = function(_, opts)
     require("diffview").setup(opts)
     vim.api.nvim_create_autocmd("BufEnter", {
       pattern = "diffview://*",
