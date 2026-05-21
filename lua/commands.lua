@@ -53,3 +53,46 @@ function Bdelete()
   vim.cmd('Alpha')
   vim.cmd('bdelete' .. current_bufnr)
 end
+
+-- ビジュアル選択とクリップボードをdiff比較する
+vim.keymap.set("v", "<leader>cf", function()
+  -- 選択範囲をレジスタzにヤンク
+  vim.cmd('noau normal! "zy')
+  local selection = vim.fn.getreg("z")
+  local selection_lines = vim.split(selection, "\n")
+  if selection_lines[#selection_lines] == "" then
+    table.remove(selection_lines)
+  end
+
+  -- クリップボード（+レジスタ）を取得
+  local clipboard = vim.fn.getreg("+")
+  local clipboard_lines = vim.split(clipboard, "\n")
+  if clipboard_lines[#clipboard_lines] == "" then
+    table.remove(clipboard_lines)
+  end
+
+  -- 新しいタブで左右にscratchバッファを開く
+  vim.cmd("tabnew")
+
+  local left_buf = vim.api.nvim_get_current_buf()
+  vim.bo[left_buf].buftype = "nofile"
+  vim.bo[left_buf].bufhidden = "wipe"
+  vim.bo[left_buf].swapfile = false
+  pcall(vim.api.nvim_buf_set_name, left_buf, "Clipboard")
+  vim.api.nvim_buf_set_lines(left_buf, 0, -1, false, clipboard_lines)
+  vim.cmd("diffthis")
+
+  vim.cmd("vsplit")
+  local right_buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_win_set_buf(0, right_buf)
+  vim.bo[right_buf].buftype = "nofile"
+  vim.bo[right_buf].bufhidden = "wipe"
+  vim.bo[right_buf].swapfile = false
+  pcall(vim.api.nvim_buf_set_name, right_buf, "Selection")
+  vim.api.nvim_buf_set_lines(right_buf, 0, -1, false, selection_lines)
+  vim.cmd("diffthis")
+
+  local close = function() vim.cmd("tabclose") end
+  vim.keymap.set("n", "q", close, { buffer = left_buf, nowait = true })
+  vim.keymap.set("n", "q", close, { buffer = right_buf, nowait = true })
+end, { desc = "Diff selection vs clipboard" })
