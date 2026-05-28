@@ -1,4 +1,8 @@
--- vim.cmd[[colorscheme apprentice]]
+vim.cmd[[colorscheme apprentice]]
 -- vim.cmd[[colorscheme lucario]]
 -- vim.cmd[[colorscheme fairyfloss]]
-vim.cmd [[colorscheme everforest]]
+
+if os.getenv("NVIM_MINIMUM") == nil then
+  vim.cmd [[colorscheme everforest]]
+end
+

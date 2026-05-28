@@ -22,7 +22,23 @@ vim.opt.rtp:prepend(lazypath)
 
 -- vscodeからNeovimを開いた場合は、プラグインを使用しない
 if not vim.g.vscode then
-  require("lazy").setup("plugins")
+  local function load_plugins()
+    local minimum_plugins = require("config.minimum_plugins")
+    if os.getenv("NVIM_MINIMUM") == nil then
+      return "plugins"
+    end
+
+    local specs = {}
+    for _, name in ipairs(minimum_plugins) do
+      local ok, spec = pcall(require, "plugins." .. name)
+      if ok then
+        table.insert(specs, spec)
+      end
+    end
+    return specs
+  end
+
+  require("lazy").setup(load_plugins())
   require("colorscheme")
   require("lsp.lsp")
 end
