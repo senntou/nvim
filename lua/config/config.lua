@@ -20,6 +20,9 @@ vim.o.smartindent = true
 -- スクロール
 vim.o.scrolloff = 6
 
+-- insert mode の C-f/C-b（カーソル左右移動）で行をまたげるようにする
+vim.opt.whichwrap:append("[,]")
+
 -- cppファイルのコメントアウト
 -- luaで書き直す
 vim.api.nvim_create_autocmd("FileType", {
