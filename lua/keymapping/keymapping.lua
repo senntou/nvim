@@ -73,6 +73,13 @@ vim.keymap.set(
 -- insert mode で Ctrl + l で Escape
 vim.keymap.set('i', '<C-l>', '<Esc>', { noremap = true })
 
+-- insert mode の Emacs キーバインド
+-- C-u（行頭まで削除）と C-w（単語削除）は Vim のデフォルトのままで Emacs と同じ挙動
+-- C-n/C-p/C-e/C-f/C-b は nvim-cmp 側で設定（補完メニューとの兼ね合いがあるため）
+vim.keymap.set('i', '<C-a>', '<Home>', { noremap = true, desc = 'Beginning of line' })
+-- 注: i_CTRL-D（インデントを1段下げる）は無効になる。インデント下げは Shift-Tab を使う
+vim.keymap.set('i', '<C-d>', '<Del>', { noremap = true, desc = 'Delete char forward' })
+
 
 -- terminal でのEscキーの挙動を変更（lazygitバッファを除く）
 vim.api.nvim_create_autocmd("TermOpen", {
