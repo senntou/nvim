@@ -3,19 +3,25 @@
 local M = {}
 
 M.current = "sparkle"
+M.level = 2 -- how flashy the sparkle style is: 1 (subtle) .. 3 (loud)
+M.LEVEL_MAX = 3
 
 local function state_file()
   return vim.fn.stdpath("state") .. "/sparkle.json"
 end
 
-function M.load(default)
+function M.load(default, default_level)
   M.current = default or "sparkle"
+  M.level = default_level or M.level
   local f = io.open(state_file(), "r")
   if f then
     local ok, data = pcall(vim.json.decode, f:read("*a"))
     f:close()
     if ok and type(data) == "table" and (data.style == "sparkle" or data.style == "calm") then
       M.current = data.style
+    end
+    if ok and type(data) == "table" and type(data.level) == "number" then
+      M.level = math.max(1, math.min(M.LEVEL_MAX, math.floor(data.level)))
     end
   end
   return M.current
@@ -25,7 +31,7 @@ function M.save()
   vim.fn.mkdir(vim.fn.stdpath("state"), "p")
   local f = io.open(state_file(), "w")
   if not f then return end
-  f:write(vim.json.encode({ style = M.current }))
+  f:write(vim.json.encode({ style = M.current, level = M.level }))
   f:close()
 end
 

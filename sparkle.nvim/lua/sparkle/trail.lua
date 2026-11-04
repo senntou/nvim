@@ -4,7 +4,8 @@
 -- hl_mode=combine, so the editor stays fully visible: over blank cells a particle shows a spark
 -- glyph, over text it just lights the character up in its colour for a moment.
 local api, uv = vim.api, vim.uv or vim.loop
-local in_cmdline = require("sparkle.style").in_cmdline
+local style = require("sparkle.style")
+local in_cmdline = style.in_cmdline
 local floor, max, min, abs, sqrt = math.floor, math.max, math.min, math.abs, math.sqrt
 local random = math.random
 
@@ -12,6 +13,7 @@ local M = {}
 
 M.config = {
   typing = true, -- sparks on every inserted character
+  delete = true, -- deleted characters crumble and fall (insert mode <BS>, <Del>, <C-w>, <C-u>)
   move = true, -- comet trail on cursor jumps
   min_jump = { rows = 2, cols = 6 }, -- smaller moves only leave a single fading dot
   small_moves = true, -- the single fading dot for hjkl-sized moves
@@ -270,6 +272,36 @@ function M.trail(x0, y0, x1, y1)
   start()
 end
 
+-- deleted text crumbles: each character hops up and falls away, with a little dust
+function M.crumble(x, y, text)
+  local w = api.nvim_get_current_win()
+  if not eligible(w) then return end
+  claim(w)
+  local lv = style.level or 2
+  local col, n = 0, 0
+  for ch in text:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
+    local cw = ch == "\t" and 1 or max(1, vim.fn.strdisplaywidth(ch))
+    if n < 24 and ch:match("%S") and cw == 1 then
+      n = n + 1
+      add({
+        x = x + col, y = y, vx = (random() - 0.5) * 6, vy = -(4 + random() * 4),
+        life = 0.45 + random() * 0.3, col = random() < 0.6 and 2 or 4, glyph = ch, grav = 28, drag = 1.2,
+      })
+    end
+    col = col + cw
+  end
+  -- dust where the text was
+  for _ = 1, min(18, 2 + lv * 2 + floor(col / 2)) do
+    local a = random() * 6.283
+    local sp = 4 + random() * 8
+    add({
+      x = x + random() * max(1, col) - 0.5, y = y, vx = math.cos(a) * sp, vy = math.sin(a) * sp * 0.4,
+      life = 0.2 + random() * 0.25, col = random() < 0.5 and 4 or 5, glyph = GLYPHS[#GLYPHS], drag = 4,
+    })
+  end
+  start()
+end
+
 function M.dot(x, y)
   local w = api.nvim_get_current_win()
   if not eligible(w) then return end
@@ -313,6 +345,48 @@ function M.setup()
         M.sparks(x - 1, y, 4 + random(0, 3))
         last = nil
       end)
+    end })
+  end
+
+  if M.config.delete then
+    -- remember the cursor line; a shorter line on the same row after TextChangedI = deletion
+    local snap
+    local function take()
+      local w = api.nvim_get_current_win()
+      if not eligible(w) then snap = nil return end
+      local row = api.nvim_win_get_cursor(w)[1] - 1
+      snap = { buf = api.nvim_get_current_buf(), row = row,
+        line = api.nvim_buf_get_lines(0, row, row + 1, false)[1] or "" }
+    end
+    api.nvim_create_autocmd("InsertEnter", { group = grp, callback = take })
+    -- only when the row changes: on the same row TextChangedI keeps the snapshot current
+    -- (CursorMovedI may fire before TextChangedI and must not swallow the old line)
+    api.nvim_create_autocmd("CursorMovedI", { group = grp, callback = function()
+      local row = api.nvim_win_get_cursor(0)[1] - 1
+      if not snap or snap.buf ~= api.nvim_get_current_buf() or snap.row ~= row then take() end
+    end })
+    api.nvim_create_autocmd("TextChangedI", { group = grp, callback = function()
+      local old = snap
+      take()
+      local new = snap
+      if not old or not new or old.buf ~= new.buf or old.row ~= new.row then return end
+      if vim.fn.pumvisible() == 1 or #new.line >= #old.line then return end
+      -- deleted span = what is left after stripping the common prefix and suffix
+      local a, b = old.line, new.line
+      local p = 0
+      while p < #b and a:byte(p + 1) == b:byte(p + 1) do p = p + 1 end
+      local q = 0
+      while q < #b - p and a:byte(#a - q) == b:byte(#b - q) do q = q + 1 end
+      -- keep the span on utf-8 character boundaries
+      while p > 0 and (a:byte(p + 1) or 0) >= 0x80 and (a:byte(p + 1) or 0) < 0xc0 do p = p - 1 end
+      local gone = a:sub(p + 1, #a - q)
+      if gone == "" then return end
+      -- screen x of the span start, relative to the cursor (works with wrap and leftcol)
+      local cx, y = cursor_xy()
+      local ccol = api.nvim_win_get_cursor(0)[2]
+      local x = cx + vim.fn.strdisplaywidth(b:sub(1, p)) - vim.fn.strdisplaywidth(b:sub(1, ccol))
+      M.crumble(x, y, gone)
+      last = nil
     end })
   end
 

@@ -2,6 +2,7 @@
 --
 --   require("sparkle").setup({
 --     style = "sparkle",                    -- or "calm"; only used until :SparkleStyle saves a choice
+--     level = 2,                            -- flashiness 1..3; only used until :SparkleLevel saves one
 --     dashboard = { ... },                  -- sparkle.dashboard config
 --     features = { toast = false, ... },    -- turn individual features off (read at startup)
 --   })
@@ -117,6 +118,18 @@ function M.set_style(s)
   vim.api.nvim_exec_autocmds("User", { pattern = "SparkleStyle", data = { style = s } })
 end
 
+-- flashiness of the sparkle style (1..3). Modules read style.level and react to User SparkleLevel.
+function M.set_level(n)
+  n = tonumber(n)
+  if not n or n < 1 or n > style.LEVEL_MAX then
+    vim.notify("sparkle: level must be 1.." .. style.LEVEL_MAX, vim.log.levels.WARN)
+    return
+  end
+  style.level = math.floor(n)
+  style.save()
+  vim.api.nvim_exec_autocmds("User", { pattern = "SparkleLevel", data = { level = style.level } })
+end
+
 function M.toggle()
   M.set_style(style.calm() and "sparkle" or "calm")
 end
@@ -128,7 +141,7 @@ function M.setup(opts)
     return
   end
   M.features = vim.tbl_extend("force", M.features, opts_.features or {})
-  style.load(opts_.style)
+  style.load(opts_.style, opts_.level)
 
   vim.api.nvim_create_user_command("SparkleToggle", M.toggle, { desc = "sparkle: switch sparkle <-> calm style" })
   vim.api.nvim_create_user_command("SparkleStyle", function(o)
@@ -138,6 +151,14 @@ function M.setup(opts)
       M.set_style(o.args)
     end
   end, { nargs = "?", complete = function() return { "sparkle", "calm" } end, desc = "sparkle: set the style" })
+
+  vim.api.nvim_create_user_command("SparkleLevel", function(o)
+    if o.args == "" then
+      print("sparkle level: " .. style.level)
+    else
+      M.set_level(o.args)
+    end
+  end, { nargs = "?", complete = function() return { "1", "2", "3" } end, desc = "sparkle: set the flashiness (1..3)" })
 
   apply()
 end

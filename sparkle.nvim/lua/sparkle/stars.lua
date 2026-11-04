@@ -5,18 +5,31 @@
 -- buffer, never hide text and cost nothing for lines that are off screen. Twinkling is done by
 -- re-colouring a handful of highlight groups, not by moving marks.
 local api, uv = vim.api, vim.uv or vim.loop
-local in_cmdline = require("sparkle.style").in_cmdline
+local style = require("sparkle.style")
+local in_cmdline = style.in_cmdline
 local floor, max, min, sin = math.floor, math.max, math.min, math.sin
 
 local M = {}
 
+-- per flashiness level (sparkle.style.level / :SparkleLevel)
+--   density       chance of a star in each empty cell
+--   dim, bright   star colour = mix(bg, tint, dim + bright * twinkle^2)
+--   speed         twinkle speed multiplier
+--   meteor_every  seconds between shooting stars (random in range)
+--   glyphs        relative weights of the star glyphs (dot .. big star)
+M.levels = {
+  { density = 0.016, dim = 0.12, bright = 0.55, speed = 1.0, meteor_every = { 10, 25 }, glyphs = { 62, 14, 6, 5, 2, 3 } },
+  { density = 0.026, dim = 0.22, bright = 0.65, speed = 1.2, meteor_every = { 6, 15 }, glyphs = { 50, 16, 10, 8, 5, 4 } },
+  { density = 0.040, dim = 0.35, bright = 0.65, speed = 1.5, meteor_every = { 3, 8 }, glyphs = { 38, 16, 14, 12, 10, 5 } },
+}
+
+local function L() return M.levels[style.level] or M.levels[2] end
+
 M.config = {
-  density = 0.016, -- chance of a star in each empty cell
   margin = 4, -- cells kept clear right of the text
   fps = 8,
   idle_after = 30, -- seconds without input before twinkling pauses
   meteors = true, -- occasional shooting star
-  meteor_every = { 10, 25 }, -- seconds between shooting stars (random in range)
   exclude_ft = { "NvimTree", "sparkle", "lazy", "mason", "TelescopePrompt", "TelescopeResults", "alpha",
     "neo-tree", "Outline", "trouble", "qf", "DiffviewFiles", "NeogitStatus", "gitgraph" },
 }
@@ -57,9 +70,10 @@ local function bg_color()
 end
 
 local function pick_glyphs()
+  local w = L().glyphs
   local want = vim.o.ambiwidth == "double"
-    and { { ".", 70 }, { "+", 8 }, { "*", 4 } }
-    or { { "·", 62 }, { "⋅", 14 }, { "✧", 6 }, { "⋆", 5 }, { "✦", 2 }, { "+", 3 } }
+    and { { ".", w[1] + w[2] }, { "+", w[3] + w[6] }, { "*", w[4] + w[5] } }
+    or { { "·", w[1] }, { "⋅", w[2] }, { "✧", w[3] }, { "⋆", w[4] }, { "✦", w[5] }, { "+", w[6] } }
   local out, total = {}, 0
   for _, g in ipairs(want) do
     if vim.fn.strdisplaywidth(g[1]) == 1 then
@@ -83,7 +97,7 @@ local function stars_for(row, width)
   local s = cache[row]
   if s then return s end
   s = {}
-  local d = M.config.density
+  local d = L().density
   for c = 0, width - 1 do
     if hash(row, c) < d then
       s[#s + 1] = { c, glyph_for(hash(c, row + 7919)), "SparkleStar" .. (floor(hash(row + 31, c + 17) * NG) + 1) }
@@ -107,10 +121,11 @@ local TINTS = { 0xf4f7ff, 0x9ff0ff, 0xc9b6ff, 0xffe6a0, 0xffb8ec, 0xb8ffd9 }
 local bg
 local function paint(t)
   bg = bg or bg_color()
+  local lv = L()
   for i = 1, NG do
     local tint = rgb(TINTS[i])
-    local tw = 0.5 + 0.5 * sin(t * (0.9 + 0.37 * i) + i * 1.7)
-    local k = 0.12 + 0.55 * tw * tw
+    local tw = 0.5 + 0.5 * sin(t * lv.speed * (0.9 + 0.37 * i) + i * 1.7)
+    local k = min(1, lv.dim + lv.bright * tw * tw)
     api.nvim_set_hl(0, "SparkleStar" .. i, { fg = pack(mix(bg, tint, k)), default = false })
   end
   api.nvim_set_hl(0, "SparkleMeteorHead", { fg = pack(mix(bg, rgb(0xffffff), 0.95)), bold = true })
@@ -121,7 +136,7 @@ end
 
 ---------------------------------------------------------------- shooting stars
 local function schedule_meteor()
-  local r = M.config.meteor_every
+  local r = L().meteor_every
   next_meteor = now() + r[1] + math.random() * (r[2] - r[1])
 end
 
@@ -280,6 +295,12 @@ function M.setup()
   end })
   api.nvim_create_autocmd("OptionSet", { group = grp, pattern = "ambiwidth", callback = function()
     glyphs, cache, cache_w = pick_glyphs(), {}, -1
+  end })
+  api.nvim_create_autocmd("User", { group = grp, pattern = "SparkleLevel", callback = function()
+    glyphs, cache, cache_w = pick_glyphs(), {}, -1
+    schedule_meteor()
+    paint(now())
+    pcall(api.nvim__redraw, { valid = false, flush = true })
   end })
   api.nvim_create_autocmd("FocusLost", { group = grp, callback = stop })
   api.nvim_create_autocmd("FocusGained", { group = grp, callback = function()
