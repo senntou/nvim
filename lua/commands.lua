@@ -27,31 +27,37 @@ end
 -- バッファを閉じる
 -- バッファを閉じた後は、一つ前のバッファに移動する
 function Bdelete()
-  local buf_list = vim.fn.getbufinfo({ buflisted = 1 })
   local current_bufnr = vim.fn.bufnr('%')
-
+  -- NvimTree などのサイドバー（unlisted）上では何もしない（ツリーの窓にファイルが開いてしまうため）
+  if vim.fn.buflisted(current_bufnr) == 0 and vim.bo.filetype ~= 'sparkle' then
+    return
+  end
+  -- 移動先の候補: listed かつ terminal 以外、現在のバッファ以外
+  local candidates = {}
   local current_idx = 0
-  for idx, buf in ipairs(buf_list) do
+  for _, buf in ipairs(vim.fn.getbufinfo({ buflisted = 1 })) do
     if buf.bufnr == current_bufnr then
-      current_idx = idx
-      break
+      current_idx = #candidates + 1
+    elseif vim.bo[buf.bufnr].buftype ~= 'terminal' then
+      table.insert(candidates, buf.bufnr)
     end
   end
 
-  local next_idx = (current_idx + #buf_list - 2) % #buf_list + 1
-  while vim.api.nvim_get_option_value('buftype', { buf = buf_list[next_idx].bufnr }) == 'terminal' do
-    next_idx = (next_idx + #buf_list - 2) % #buf_list + 1
+  if #candidates > 0 then
+    -- 一つ前のバッファ（先頭なら末尾）へ
+    local idx = current_idx - 1
+    if idx < 1 then idx = #candidates end
+    vim.cmd('buffer ' .. candidates[idx])
+  else
+    -- 他に開くバッファが無ければダッシュボードへ
+    local ok = pcall(function() require('sparkle.dashboard').open() end)
+    if not ok then vim.cmd('enew') end
   end
 
-  local next_bufnr = buf_list[next_idx].bufnr
-  if vim.fn.buflisted(next_bufnr) ~= 0 and next_bufnr ~= current_bufnr then
-    vim.cmd('buffer ' .. next_bufnr)
+  if vim.api.nvim_buf_is_valid(current_bufnr) and vim.fn.buflisted(current_bufnr) == 1
+    and vim.bo[current_bufnr].filetype ~= 'sparkle' then
     vim.cmd('bdelete ' .. current_bufnr)
-    return
   end
-
-  vim.cmd('Alpha')
-  vim.cmd('bdelete' .. current_bufnr)
 end
 
 -- ビジュアル選択とクリップボードをdiff比較する

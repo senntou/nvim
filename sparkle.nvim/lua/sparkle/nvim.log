@@ -1,0 +1,16 @@
+WRN 2026-11-05T07:21:32.812 ?.4        server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.4.0
+WRN 2026-11-05T07:21:32.824 ?.6        server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.6.0
+WRN 2026-11-05T07:21:32.835 ?.8        server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.8.0
+WRN 2026-11-05T07:21:32.847 ?.10       server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.10.0
+WRN 2026-11-05T07:21:32.867 ?.12       server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.12.0
+WRN 2026-11-05T07:21:32.883 ?.14       server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.14.0
+WRN 2026-11-05T07:21:32.912 ?.16       server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.16.0
+WRN 2026-11-05T07:21:32.935 ?.18       server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.18.0
+WRN 2026-11-05T07:21:32.952 ?.20       server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.20.0
+WRN 2026-11-05T07:21:32.970 ?.22       server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.22.0
+WRN 2026-11-05T07:21:32.981 ?.24       server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.24.0
+WRN 2026-11-05T07:21:32.998 ?.26       server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.26.0
+WRN 2026-11-05T07:21:33.011 ?.28       server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.28.0
+WRN 2026-11-05T07:21:33.027 ?.30       server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.30.0
+WRN 2026-11-05T07:21:33.043 ?.32       server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.32.0
+WRN 2026-11-05T07:21:33.066 ?.34       server_start:197: Failed to start server: operation not permitted: /run/user/10104/nvim.34.0
