@@ -4,6 +4,7 @@
 -- Each visible line gets an extmark with number_hl_group = SparkleNr<i> (i = position in the
 -- window); the flow is done by re-colouring those groups, so marks only change on scroll/edit.
 local api, uv = vim.api, vim.uv or vim.loop
+local in_cmdline = require("sparkle.style").in_cmdline
 local floor, max, min, sin = math.floor, math.max, math.min, math.sin
 
 local M = {}
@@ -104,6 +105,7 @@ local function refresh()
   pending = true
   vim.schedule(function()
     pending = false
+    if in_cmdline() then return end -- redone on CmdlineLeave
     for buf in pairs(marked) do
       if api.nvim_buf_is_valid(buf) then api.nvim_buf_clear_namespace(buf, ns, 0, -1) end
     end
@@ -123,6 +125,7 @@ local function stop() if timer then timer:stop() end end
 local function tick()
   local t = uv.hrtime() / 1e9
   if t - last_input > M.config.idle_after then return stop() end
+  if in_cmdline() then return end
   paint(t)
 end
 
@@ -150,6 +153,7 @@ function M.setup()
   api.nvim_create_autocmd({ "WinScrolled", "WinResized", "VimResized", "BufWinEnter", "WinEnter", "WinNew",
     "TextChanged", "InsertLeave", "TabEnter" }, { group = grp, callback = refresh })
   api.nvim_create_autocmd("OptionSet", { group = grp, pattern = { "number", "relativenumber" }, callback = refresh })
+  api.nvim_create_autocmd("CmdlineLeave", { group = grp, callback = refresh })
   -- the cursor line is left to CursorLineNr: only re-mark when the cursor changes line
   api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI", "TextChangedI" }, { group = grp, callback = function(ev)
     local w = api.nvim_get_current_win()

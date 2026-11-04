@@ -4,6 +4,7 @@
 -- hl_mode=combine, so the editor stays fully visible: over blank cells a particle shows a spark
 -- glyph, over text it just lights the character up in its colour for a moment.
 local api, uv = vim.api, vim.uv or vim.loop
+local in_cmdline = require("sparkle.style").in_cmdline
 local floor, max, min, abs, sqrt = math.floor, math.max, math.min, math.abs, math.sqrt
 local random = math.random
 
@@ -170,6 +171,12 @@ end
 
 local prev_t
 local function tick()
+  if in_cmdline() then -- drop the effect, one last redraw before typing starts
+    parts, view = {}, nil
+    stop()
+    redraw(win)
+    return
+  end
   local t = uv.hrtime() / 1e9
   local dt = min(0.05, t - (prev_t or t))
   prev_t = t

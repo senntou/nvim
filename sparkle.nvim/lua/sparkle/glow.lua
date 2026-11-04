@@ -1,6 +1,7 @@
 -- sparkle.glow: window separators, float borders and the cursor line number slowly "breathe"
 -- in the colour of the current mode.
 local api, uv = vim.api, vim.uv or vim.loop
+local in_cmdline = require("sparkle.style").in_cmdline
 local floor, sin = math.floor, math.sin
 
 local M = {}
@@ -55,8 +56,9 @@ end
 
 local NAVY, PURPLE, WHITE = rgb(0x1a2250), rgb(0x9a5cff), rgb(0xffffff)
 
-local function tick()
+local function tick(force)
   if not active then return end
+  if not force and in_cmdline() then return end
   local t = uv.hrtime() / 1e9
   if t - last_input > M.config.idle_after then
     if timer then timer:stop() end
@@ -106,9 +108,11 @@ function M.setup()
   capture()
   local grp = api.nvim_create_augroup("SparkleGlow", { clear = true })
   api.nvim_create_autocmd("ColorScheme", { group = grp, callback = function()
-    vim.schedule(function() capture(); tick() end)
+    vim.schedule(function() capture(); tick(true) end)
   end })
-  api.nvim_create_autocmd("ModeChanged", { group = grp, callback = function() vim.schedule(tick) end })
+  api.nvim_create_autocmd("ModeChanged", { group = grp, callback = function()
+    vim.schedule(function() tick(true) end)
+  end })
   api.nvim_create_autocmd("FocusLost", { group = grp, callback = function() if timer then timer:stop() end end })
   api.nvim_create_autocmd("FocusGained", { group = grp, callback = function()
     last_input = uv.hrtime() / 1e9

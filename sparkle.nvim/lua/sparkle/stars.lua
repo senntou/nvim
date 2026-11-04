@@ -5,6 +5,7 @@
 -- buffer, never hide text and cost nothing for lines that are off screen. Twinkling is done by
 -- re-colouring a handful of highlight groups, not by moving marks.
 local api, uv = vim.api, vim.uv or vim.loop
+local in_cmdline = require("sparkle.style").in_cmdline
 local floor, max, min, sin = math.floor, math.max, math.min, math.sin
 
 local M = {}
@@ -229,6 +230,7 @@ local function redraw_meteor_win()
 end
 
 local function tick()
+  if in_cmdline() then return end
   local t = now()
   if meteor and t - meteor.t0 > meteor.life then
     local w = meteor.win

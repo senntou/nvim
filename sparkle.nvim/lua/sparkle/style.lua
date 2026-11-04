@@ -31,4 +31,11 @@ end
 
 function M.calm() return M.current == "calm" end
 
+-- True while the command line is open. Effects that re-colour highlight groups or force window
+-- redraws must hold still then: 'incsearch' / 'inccommand' highlighting is only painted by the
+-- redraw that follows each keystroke, and any later window redraw wipes it again (= flicker).
+function M.in_cmdline()
+  return vim.api.nvim_get_mode().mode:sub(1, 1) == "c"
+end
+
 return M
