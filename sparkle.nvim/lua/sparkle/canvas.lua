@@ -10,6 +10,8 @@ local floor, max, min, abs, sqrt = math.floor, math.max, math.min, math.abs, mat
 local M = {}
 
 local HALF = "▀"
+local LOWER = "▄"
+local DEF = -2 -- "default background" (SGR 49): the window's Normal background shows through
 local Q = 4 -- colour quantisation step (tiny colour drifts do not cause redraws)
 
 ---------------------------------------------------------------- colour helpers
@@ -68,8 +70,21 @@ function Canvas:resize(cols, rows)
     R[i], G[i], B[i] = 0, 0, 0
   end
   self.R, self.G, self.B = R, G, B
+  if self.T then self.T = {} end
   self.text = {}
   self.af = nil
+end
+
+-- Transparent mode: pixels nothing was drawn on since clear_pixels() are not painted at all, so the
+-- window's own background (e.g. Normal, or the terminal's when that has no bg) shows instead.
+-- `base` is the colour blending starts from (should be close to that background).
+function Canvas:clear_pixels(base)
+  local R, G, B = self.R, self.G, self.B
+  local r, g, b = base[1], base[2], base[3]
+  for i = 1, #R do
+    R[i], G[i], B[i] = r, g, b
+  end
+  self.T = {}
 end
 
 function Canvas:clear_text()
@@ -89,6 +104,7 @@ function Canvas:pset(x, y, c)
   if x < 0 or y < 0 or x >= self.pw or y >= self.ph then return end
   local i = y * self.pw + x + 1
   self.R[i], self.G[i], self.B[i] = c[1], c[2], c[3]
+  if self.T then self.T[i] = true end
 end
 
 function Canvas:pget(x, y)
@@ -103,6 +119,10 @@ function Canvas:pblend(x, y, c, a)
   if x < 0 or y < 0 or x >= self.pw or y >= self.ph then return end
   local i = y * self.pw + x + 1
   local R, G, B = self.R, self.G, self.B
+  if self.T then
+    if a < 0.03 then return end
+    self.T[i] = true
+  end
   R[i] = R[i] + (c[1] - R[i]) * a
   G[i] = G[i] + (c[2] - G[i]) * a
   B[i] = B[i] + (c[3] - B[i]) * a
@@ -115,6 +135,10 @@ function Canvas:padd(x, y, c, k)
   k = k or 1
   local i = y * self.pw + x + 1
   local R, G, B = self.R, self.G, self.B
+  if self.T then
+    if k * max(c[1], c[2], c[3]) < 8 then return end -- too faint to be worth an opaque cell
+    self.T[i] = true
+  end
   R[i] = min(255, R[i] + c[1] * k)
   G[i] = min(255, G[i] + c[2] * k)
   B[i] = min(255, B[i] + c[3] * k)
@@ -266,6 +290,7 @@ end
 -- Feed the result to a terminal buffer (nvim_open_term + nvim_chan_send).
 function Canvas:render_ansi()
   local R, G, B, pw, cols, text = self.R, self.G, self.B, self.pw, self.cols, self.text
+  local T = self.T
   local n = cols * self.rows
   local pf, pb, pc = self.af, self.ab, self.ac
   local full = not pf or #pf ~= n
@@ -305,8 +330,19 @@ function Canvas:render_ansi()
         f = q(fc[1]) * 65536 + q(fc[2]) * 256 + q(fc[3])
         if bc then
           b = q(bc[1]) * 65536 + q(bc[2]) * 256 + q(bc[3])
+        elseif T and not T[ti] and not T[bi] then
+          b = DEF
         else
           b = q((R[ti] + R[bi]) * 0.5) * 65536 + q((G[ti] + G[bi]) * 0.5) * 256 + q((B[ti] + B[bi]) * 0.5)
+        end
+      elseif T and not (T[ti] and T[bi]) then
+        bold, b = false, DEF
+        if T[ti] then
+          ch, f = HALF, q(R[ti]) * 65536 + q(G[ti]) * 256 + q(B[ti])
+        elseif T[bi] then
+          ch, f = LOWER, q(R[bi]) * 65536 + q(G[bi]) * 256 + q(B[bi])
+        else
+          ch, f = " ", 0
         end
       else
         ch, bold = HALF, false
@@ -336,7 +372,8 @@ function Canvas:render_ansi()
         end
         if b ~= cur_b then
           no = no + 1
-          out[no] = fmt("\27[48;2;%d;%d;%dm", floor(b / 65536), floor(b / 256) % 256, b % 256)
+          out[no] = b == DEF and "\27[49m"
+            or fmt("\27[48;2;%d;%d;%dm", floor(b / 65536), floor(b / 256) % 256, b % 256)
           cur_b = b
         end
         no = no + 1

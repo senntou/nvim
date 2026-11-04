@@ -4,11 +4,15 @@
 -- lives in a normal floating window (so the real cursor, CJK input and syntax colouring just
 -- work), sitting on top of an animated sparkle.canvas frame.
 -- Messages are left alone (they still appear at the bottom).
+-- The box is transparent (the editor's Normal background shows through); typing makes the
+-- input text itself light up (a pop on the new character and a ripple running along the line),
+-- and while searching, the matches in the window flash their background whenever the pattern changes.
 -- calm style: no canvas frame; the text window gets a plain rounded border in the colorscheme's colours.
 local overlay = require("sparkle.overlay")
 local C = require("sparkle.canvas")
+local theme = require("sparkle.theme")
 local api, fn = vim.api, vim.fn
-local floor, max, min, sin = math.floor, math.max, math.min, math.sin
+local floor, max, min = math.floor, math.max, math.min
 local pal = overlay.pal
 
 local M = {}
@@ -18,6 +22,9 @@ M.config = {
   max_width = 0.8, -- fraction of the screen
   row = 0.30, -- vertical position (fraction of the screen)
   fps = 24,
+  effects = true, -- input text lights up while typing
+  search_effects = true, -- search matches shimmer (background) and burst when the pattern changes
+  max_search_flashes = 40,
 }
 
 local ns = api.nvim_create_namespace("sparkle.cmdline")
@@ -28,19 +35,19 @@ local S = {
   block = {}, -- previous lines of a cmdline block (:function ... etc.)
   prefix_len = 0, row = 0, -- cursor anchor
   redrawing = false,
-  shown_at = 0,
 }
 
 local kinds = {
-  [":"] = { label = "COMMAND", icon = "❯ ", a = pal.cyan, b = pal.purple },
-  ["/"] = { label = "SEARCH ↓", icon = "/ ", a = pal.gold, b = pal.magenta },
-  ["?"] = { label = "SEARCH ↑", icon = "? ", a = pal.gold, b = pal.magenta },
-  ["="] = { label = "EXPRESSION", icon = "= ", a = pal.green, b = pal.cyan },
-  [">"] = { label = "DEBUG", icon = "> ", a = pal.red, b = pal.gold },
-  [""] = { label = "INPUT", icon = "", a = pal.magenta, b = pal.cyan },
+  [":"] = { label = "COMMAND", icon = "❯ ", a = pal.cyan, b = pal.purple, an = "cyan", bn = "purple" },
+  ["/"] = { label = "SEARCH ↓", icon = "/ ", a = pal.gold, b = pal.magenta, an = "gold", bn = "magenta" },
+  ["?"] = { label = "SEARCH ↑", icon = "? ", a = pal.gold, b = pal.magenta, an = "gold", bn = "magenta" },
+  ["="] = { label = "EXPRESSION", icon = "= ", a = pal.green, b = pal.cyan, an = "green", bn = "cyan" },
+  [">"] = { label = "DEBUG", icon = "> ", a = pal.red, b = pal.gold, an = "red", bn = "gold" },
+  [""] = { label = "INPUT", icon = "", a = pal.magenta, b = pal.cyan, an = "magenta", bn = "cyan" },
 }
 local function kind()
-  return kinds[S.firstc] or { label = "INPUT", icon = S.firstc ~= "" and (S.firstc .. " ") or "", a = pal.magenta, b = pal.cyan }
+  return kinds[S.firstc] or { label = "INPUT", icon = S.firstc ~= "" and (S.firstc .. " ") or "",
+    a = pal.magenta, b = pal.cyan, an = "magenta", bn = "cyan" }
 end
 
 ---------------------------------------------------------------- windows
@@ -62,28 +69,13 @@ end
 
 local function draw_frame(c, t, dt, ov)
   local k = kind()
-  overlay.backdrop(c, t, pal.panel, 0.05)
-  -- inner area matches the text window background exactly
-  c:fill_rect(1, 2, c.pw - 2, c.ph - 4, pal.panel, 1)
+  c:clear_pixels(theme.colors().bg) -- transparent: only what is drawn below is painted
   c:clear_text()
   overlay.frame(c, t, k.a, k.b, { speed = 0.45 })
   local title = " ✦ " .. k.label .. (S.level > 1 and ("  LV" .. S.level) or "") .. " "
   c:put_gradient(3, 0, title, C.add(k.a, pal.white, 0.35), k.b, { bold = true })
-  -- intro flash: a bright line sweeps across the frame once when the cmdline opens
-  local age = t - S.shown_at
-  if age < 0.35 then
-    local x = age / 0.35 * (c.pw + 8) - 4
-    for y = 0, c.ph - 1 do
-      c:padd(x, y, pal.white, 0.6)
-      c:padd(x - 1, y, k.a, 0.4)
-    end
-  end
-  -- twinkles that hop between the corners
-  local slot = floor(t / 0.9)
-  local u = (t / 0.9) % 1
-  local corners = { { 0, 0 }, { c.pw - 1, 0 }, { c.pw - 1, c.ph - 1 }, { 0, c.ph - 1 } }
-  local cn = corners[slot % 4 + 1]
-  overlay.twinkle(c, cn[1], cn[2], sin(u * math.pi) * 0.9, slot % 2 == 0 and k.a or pal.white)
+  M.paint_fx()
+  M.paint_search_fx()
   return true
 end
 
@@ -128,7 +120,7 @@ local function ensure_windows(g)
     text_cfg.noautocmd = true
     S.win = overlay.open_win(S.buf, false, text_cfg)
     local wo = vim.wo[S.win]
-    wo.winhighlight = (calm and "Normal:NormalFloat,FloatBorder:FloatBorder,FloatTitle:FloatTitle"
+    wo.winhighlight = (calm and "Normal:Normal,NormalFloat:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle"
       or "Normal:SparkleCmdline,NormalFloat:SparkleCmdline") .. ",Search:None,CurSearch:None,IncSearch:None"
     wo.wrap, wo.linebreak, wo.breakindent = true, false, false
     wo.showbreak, wo.list, wo.spell = "", false, false
@@ -150,7 +142,8 @@ local function ensure_windows(g)
     and api.nvim_win_get_width(S.ov.win) == frame_cfg.width and api.nvim_win_get_height(S.ov.win) == frame_cfg.height
   if not reuse then
     if S.ov then S.ov:close() end
-    S.ov = overlay.open(vim.tbl_extend("force", frame_cfg, { zindex = 240, fps = M.config.fps }), draw_frame)
+    S.ov = overlay.open(vim.tbl_extend("force", frame_cfg, { zindex = 240, fps = M.config.fps, transparent = true }),
+      draw_frame)
     if S.ov then S.ov.redraw = flush_screen end
   else
     S.ov:move(frame_cfg)
@@ -159,6 +152,7 @@ local function ensure_windows(g)
 end
 
 local function hide_windows()
+  M.clear_fx()
   if api.nvim_win_is_valid(S.win) then
     if not pcall(overlay.win_set_config, S.win, { hide = true }) or not api.nvim_win_get_config(S.win).hide then
       pcall(api.nvim_win_close, S.win, true) -- Neovim < 0.10 cannot hide floats
@@ -246,16 +240,307 @@ local function place_cursor()
   pcall(api.nvim_win_set_cursor, S.win, { S.row + 1, col })
 end
 
+---------------------------------------------------------------- input effects
+-- Highlights on the input text inside the cmdline's own window: only that small float is redrawn,
+-- the editor windows (and their 'incsearch' highlighting) are left alone.
+local fxns = api.nvim_create_namespace("sparkle.cmdline.fx")
+local FX_COLORS = { "cyan", "magenta", "gold", "green", "red", "purple" }
+local FX_LVL = 6
+local POP_LIFE, DEL_LIFE, WAVE_LIFE, WAVE_SPEED = 0.35, 0.25, 0.5, 30 -- seconds, chars/s
+local pops = {} -- { i = char index (1-based) of the touched character, t0, del }
+local painted = false
+local function now() return (vim.uv or vim.loop).hrtime() / 1e9 end
+
+-- groups are created up front: nvim_set_hl while typing would redraw every window
+function M.define_fx_hl()
+  local th = theme.colors()
+  for _, name in ipairs(FX_COLORS) do
+    for l = 1, FX_LVL do
+      local k = l / FX_LVL
+      local col = C.lerp(th.fg, C.add(pal[name], pal.white, max(0, k - 0.7) * 1.6), 0.2 + 0.8 * k)
+      api.nvim_set_hl(0, ("SparkleCmdIn_%s_%d"):format(name, l), {
+        fg = string.format("#%02x%02x%02x", min(255, floor(col[1])), min(255, floor(col[2])), min(255, floor(col[3]))),
+        bold = l >= FX_LVL - 2,
+      })
+    end
+  end
+end
+
+function M.clear_fx()
+  M.clear_search_fx()
+  pops, painted = {}, false
+  if api.nvim_buf_is_valid(S.buf) then api.nvim_buf_clear_namespace(S.buf, fxns, 0, -1) end
+end
+
+-- a character was typed (or deleted) just before the cursor
+function M.typed(insert)
+  if calm or not M.config.effects then return end
+  local i = fn.strchars(S.text:sub(1, S.pos))
+  if i < 1 then return end
+  if #pops > 12 then table.remove(pops, 1) end
+  pops[#pops + 1] = { i = i, t0 = now(), del = not insert }
+end
+
+function M.paint_fx()
+  if not api.nvim_buf_is_valid(S.buf) then return end
+  if #pops == 0 and not painted then return end
+  api.nvim_buf_clear_namespace(S.buf, fxns, 0, -1)
+  painted = false
+  if #pops == 0 then return end
+  local t = now()
+  local live = {}
+  for _, p in ipairs(pops) do
+    if t - p.t0 < WAVE_LIFE then live[#live + 1] = p end
+  end
+  pops = live
+  if #pops == 0 then return end
+  local k = kind()
+  local disp = fn.strtrans(S.text)
+  local i, byte = 0, S.prefix_len
+  for ch in disp:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
+    i = i + 1
+    local best, name = 0, nil
+    for _, p in ipairs(pops) do
+      local age = t - p.t0
+      local d = math.abs(i - p.i)
+      local v, n
+      if d == 0 then -- the character itself pops
+        v, n = 1 - age / (p.del and DEL_LIFE or POP_LIFE), p.del and k.bn or k.an
+      elseif not p.del then -- a ripple running away from it along the line
+        v, n = max(0, 1 - math.abs(d - age * WAVE_SPEED) / 1.6) * (1 - age / WAVE_LIFE) * 0.8, k.bn
+      end
+      if v and v > best then best, name = v, n end
+    end
+    if best > 0.08 then
+      painted = true
+      local lvl = max(1, min(FX_LVL, math.ceil(best * FX_LVL)))
+      pcall(api.nvim_buf_set_extmark, S.buf, fxns, S.row, byte, {
+        end_col = byte + #ch, hl_group = ("SparkleCmdIn_%s_%d"):format(name, lvl), priority = 200,
+      })
+    end
+    byte = byte + #ch
+  end
+end
+
+---------------------------------------------------------------- search match effects
+-- While searching, every visible match carries a small float whose background shimmers (a slow
+-- gold <-> magenta flow plus a white sheen sweeping across); each time the pattern changes the
+-- matches burst: a bright flash, a halo one cell wider, rippling out from the current match.
+-- Floats are composited on top of the window: the window itself is never redrawn, so the
+-- 'incsearch' highlighting underneath survives and shows through the tint.
+local matches = {} -- { row, col, width, delay, current }
+local hit_t0 = -100
+local pool = {} -- { win, buf, width, key, hl }
+local sfx_ns = api.nvim_create_namespace("sparkle.cmdline.search")
+local NHUE, NSHEEN = 12, 4
+local BURST_LIFE, HALO_LIFE = 0.7, 0.35
+local search_seq = 0
+
+local function rgbhex(c)
+  return string.format("#%02x%02x%02x", min(255, floor(c[1] + 0.5)), min(255, floor(c[2] + 0.5)), min(255, floor(c[3] + 0.5)))
+end
+
+-- created up front: nvim_set_hl while searching would redraw every window
+function M.define_search_hl()
+  local a, b = pal.gold, pal.magenta
+  for h = 1, NHUE do
+    local u = 0.5 - 0.5 * math.cos((h - 1) / NHUE * 2 * math.pi) -- cyclic a -> b -> a
+    local base = C.lerp(a, b, u)
+    for j = 0, NSHEEN - 1 do
+      api.nvim_set_hl(0, ("SparkleSearchFx_%d_%d"):format(h, j), { bg = rgbhex(C.lerp(base, pal.white, j * 0.25)) })
+    end
+  end
+  api.nvim_set_hl(0, "SparkleSearchHalo", { bg = rgbhex(C.lerp(theme.colors().bg, pal.gold, 0.5)) })
+end
+
+local function search_pattern()
+  local t, sep = S.text, S.firstc
+  local out, i = {}, 1
+  while i <= #t do -- the pattern ends at an unescaped separator (an offset may follow)
+    local c = t:sub(i, i)
+    if c == "\\" then
+      out[#out + 1] = t:sub(i, i + 1)
+      i = i + 2
+    elseif c == sep then
+      break
+    else
+      out[#out + 1] = c
+      i = i + 1
+    end
+  end
+  local pat = table.concat(out)
+  if pat == "" then return nil end
+  if vim.o.ignorecase and vim.o.smartcase and not pat:find("\\[cC]") and pat:find("%u") then pat = "\\C" .. pat end
+  return pat
+end
+
+local function find_matches()
+  local pat = search_pattern()
+  if not pat then return {} end
+  local win = api.nvim_get_current_win()
+  local info = fn.getwininfo(win)[1]
+  if not info or api.nvim_win_get_config(win).relative ~= "" then return {} end
+  local buf = api.nvim_win_get_buf(win)
+  local left, right = info.wincol - 1 + info.textoff, info.wincol - 1 + info.width
+  local cur = api.nvim_win_get_cursor(win)
+  local cur_row = fn.screenpos(win, cur[1], cur[2] + 1).row
+  local list = {}
+  for lnum = info.topline, info.botline do
+    if fn.foldclosed(lnum) == -1 then
+      local line = api.nvim_buf_get_lines(buf, lnum - 1, lnum, false)[1] or ""
+      local start = 0
+      while #list < M.config.max_search_flashes do
+        local ok, m = pcall(fn.matchstrpos, line, pat, start)
+        if not ok or m[2] < 0 then break end
+        local s, e = m[2], m[3]
+        if e > s then
+          local p = fn.screenpos(win, lnum, s + 1)
+          if p.row > 0 then
+            local w = min(fn.strdisplaywidth(line:sub(s + 1, e)), right - (p.col - 1))
+            if w > 0 then
+              list[#list + 1] = {
+                row = p.row - 1, col = p.col - 1, width = w, left = left, right = right,
+                current = lnum == cur[1] and s <= cur[2] and cur[2] < e,
+                delay = math.abs(p.row - cur_row) * 0.025, -- ripple out from the current match
+              }
+            end
+          end
+          start = e
+        else
+          start = s + 1
+        end
+        if start > #line then break end
+      end
+    end
+  end
+  return list
+end
+
+local function hide_from(n)
+  for i = n, #pool do
+    local p = pool[i]
+    if api.nvim_win_is_valid(p.win) and not p.hidden then
+      pcall(overlay.win_set_config, p.win, { hide = true })
+      p.hidden = true
+    end
+  end
+end
+
+function M.clear_search_fx()
+  matches = {}
+  hide_from(1)
+end
+
+-- the pattern changed: find the matches once incsearch has moved/scrolled the view, then burst
+function M.search_changed()
+  if calm or not M.config.search_effects then return end
+  search_seq = search_seq + 1
+  local seq = search_seq
+  vim.schedule(function()
+    if seq ~= search_seq or S.level == 0 or (S.firstc ~= "/" and S.firstc ~= "?") then return end
+    local ok, list = pcall(find_matches)
+    matches = ok and list or {}
+    hit_t0 = now()
+    if #matches == 0 then hide_from(1) end
+  end)
+end
+
+local function place(i, row, col, width)
+  local p = pool[i]
+  local cfg = { relative = "editor", row = row, col = col, width = width, height = 1, hide = false }
+  if p and api.nvim_win_is_valid(p.win) and api.nvim_win_get_tabpage(p.win) == api.nvim_get_current_tabpage() then
+    if p.width ~= width then
+      api.nvim_buf_set_lines(p.buf, 0, -1, false, { (" "):rep(width) })
+      p.width, p.key = width, nil
+    end
+    if p.hidden or p.row ~= row or p.col ~= col or p.cfg_w ~= width then
+      pcall(overlay.win_set_config, p.win, cfg)
+      p.hidden, p.row, p.col, p.cfg_w = false, row, col, width
+    end
+    return p
+  end
+  if p and api.nvim_win_is_valid(p.win) then pcall(api.nvim_win_close, p.win, true) end
+  local buf = (p and api.nvim_buf_is_valid(p.buf)) and p.buf or api.nvim_create_buf(false, true)
+  vim.bo[buf].bufhidden = "hide"
+  api.nvim_buf_set_lines(buf, 0, -1, false, { (" "):rep(width) })
+  cfg.zindex, cfg.style, cfg.focusable, cfg.noautocmd, cfg.border = 45, "minimal", false, true, "none"
+  local ok, win = pcall(overlay.open_win, buf, false, cfg)
+  if not ok then return nil end
+  vim.wo[win].winblend = 100
+  vim.wo[win].winhighlight = "Normal:SparkleSearchHalo"
+  pcall(function() vim.wo[win].eventignorewin = "all" end)
+  p = { win = win, buf = buf, width = width, row = row, col = col, cfg_w = width }
+  pool[i] = p
+  return p
+end
+
+function M.paint_search_fx()
+  if #matches == 0 then return end
+  if calm or S.level == 0 or (S.firstc ~= "/" and S.firstc ~= "?") then return M.clear_search_fx() end
+  local t = now()
+  for i, m in ipairs(matches) do
+    local age = t - hit_t0 - m.delay
+    local burst = (age >= 0 and age < BURST_LIFE) and (1 - age / BURST_LIFE) or 0
+    burst = burst * burst
+    -- tint strength 0..1: a gentle breathing glow, raised by the burst
+    local base = 0.3 + 0.08 * math.sin(t * 3.1 + i * 0.9)
+    local strength = max(base, (m.current and 0.85 or 0.7) * burst)
+    local halo = age >= 0 and age < HALO_LIFE
+    local col, width, pad_l = m.col, m.width, 0
+    if halo then
+      if col - 1 >= m.left then col, pad_l = col - 1, 1 end
+      width = m.width + pad_l + ((m.col + m.width < m.right) and 1 or 0)
+    end
+    local p = place(i, m.row, col, width)
+    if p then
+      local blend = floor(100 - strength * 100 + 0.5)
+      if p.blend ~= blend then
+        vim.wo[p.win].winblend = blend
+        p.blend = blend
+      end
+      -- per cell: flowing hue + a white sheen sweeping across now and then (+ white at the burst)
+      local sweep = ((t * 0.55 + i * 0.37) % 1.6) * (m.width + 6) - 3
+      local flash = (age >= 0 and age < 0.18) and (NSHEEN - 1) or 0
+      local groups = {}
+      for x = 0, width - 1 do
+        local cx = x - pad_l
+        if cx < 0 or cx >= m.width then
+          groups[x + 1] = "SparkleSearchHalo"
+        else
+          local h = floor(((cx * 0.12 + i * 0.29 - t * 0.45) % 1) * NHUE) + 1
+          local j = max(flash, floor(max(0, 1 - math.abs(cx - sweep) / 1.6) * (NSHEEN - 1) + 0.5))
+          groups[x + 1] = ("SparkleSearchFx_%d_%d"):format(h, j)
+        end
+      end
+      local key = table.concat(groups, ",")
+      if p.key ~= key then
+        p.key = key
+        api.nvim_buf_clear_namespace(p.buf, sfx_ns, 0, -1)
+        for x = 0, width - 1 do
+          api.nvim_buf_set_extmark(p.buf, sfx_ns, 0, x, { end_col = x + 1, hl_group = groups[x + 1] })
+        end
+      end
+    end
+  end
+  hide_from(#matches + 1)
+end
+
 ---------------------------------------------------------------- ui events
 local H = {}
 
 function H.cmdline_show(content, pos, firstc, prompt, indent, level, _hl_id)
   local text = {}
   for _, chunk in ipairs(content) do text[#text + 1] = chunk[2] end
-  if S.level == 0 then S.shown_at = S.ov and S.ov.t0 and ((vim.uv or vim.loop).hrtime() / 1e9 - S.ov.t0) or 0 end
-  S.text, S.pos, S.firstc, S.prompt, S.indent, S.level = table.concat(text), pos, firstc, prompt, indent, level
+  local new = table.concat(text)
+  local delta = S.level == level and (#new - #S.text) or 0
+  S.text, S.pos, S.firstc, S.prompt, S.indent, S.level = new, pos, firstc, prompt, indent, level
   render()
   place_cursor()
+  if delta ~= 0 then
+    M.typed(delta > 0)
+    if firstc == "/" or firstc == "?" then M.search_changed() end
+  end
+  M.paint_fx()
 end
 
 function H.cmdline_pos(pos, _level)
@@ -314,7 +599,9 @@ local scheduled = vim.schedule_wrap(handle)
 
 ---------------------------------------------------------------- setup
 local function define_hl()
-  api.nvim_set_hl(0, "SparkleCmdline", { default = true, bg = "#0c1230", fg = "#e6ecff" })
+  api.nvim_set_hl(0, "SparkleCmdline", { default = true, link = "Normal" }) -- see-through box
+  M.define_fx_hl()
+  M.define_search_hl()
   api.nvim_set_hl(0, "SparkleCmdlineIcon", { default = true, fg = "#46e0ff", bold = true })
   api.nvim_set_hl(0, "SparkleCmdlinePrompt", { default = true, fg = "#ffd34d", bold = true })
 end
@@ -344,6 +631,7 @@ end
 function M.set_calm(c)
   if c == calm then return end
   calm = c
+  M.clear_fx()
   -- recreate both windows in the new style next time the cmdline opens
   if api.nvim_win_is_valid(S.win) then pcall(api.nvim_win_close, S.win, true) end
   if S.ov then
@@ -353,6 +641,7 @@ function M.set_calm(c)
 end
 
 function M.setup()
+  define_hl()
   local grp = api.nvim_create_augroup("SparkleCmdline", { clear = true })
   api.nvim_create_autocmd("ColorScheme", { group = grp, callback = define_hl })
   api.nvim_create_autocmd("VimResized", { group = grp, callback = function()

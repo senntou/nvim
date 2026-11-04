@@ -27,12 +27,13 @@ M.features = {
   stars = true, -- twinkling stars in the empty space            (decoration)
   trail = true, -- sparks while typing, comet trail on jumps     (decoration)
   linenr = true, -- flowing gradient line numbers                (decoration)
+  searchfx = true, -- search matches keep shimmering after <CR>  (decoration)
 }
 
 -- UI parts: always set up, told about the style via set_calm(calm)
 local UI = { "dashboard", "notify", "cmdline", "statusline" }
 -- decorations: only set up while the sparkle style is on, switched with set_active(on)
-local DECOR = { "toast", "warp", "glow", "stars", "trail", "linenr" }
+local DECOR = { "toast", "warp", "glow", "stars", "trail", "linenr", "searchfx" }
 
 local loaded = {} -- [name] = true once its setup() ran
 local opts_ = {}

@@ -73,7 +73,10 @@ function M.open(cfg, draw)
     return nil
   end
   vim.wo[win].winblend = cfg.blend or 0
-  vim.wo[win].winhighlight = "Normal:SparkleOverlay,NormalFloat:SparkleOverlay"
+  -- transparent overlays: the canvas leaves undrawn cells at the default background, which is
+  -- the editor's Normal background here (the terminal's own when Normal has none)
+  vim.wo[win].winhighlight = cfg.transparent and "Normal:Normal,NormalFloat:Normal"
+    or "Normal:SparkleOverlay,NormalFloat:SparkleOverlay"
   local chan = open_term(buf)
   if not chan then
     pcall(api.nvim_win_close, win, true)
