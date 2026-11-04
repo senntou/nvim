@@ -3,4 +3,8 @@ return {
   "telescope",
   "bufferline",
   "alpha-nvim",
+  "transparent",
+  "gridjump",
+  "render-markdown",
+  "autolist"
 }
