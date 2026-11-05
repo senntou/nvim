@@ -16,6 +16,13 @@ return {
       vim.notify("sparkle level: " .. require("sparkle.style").level)
     end, desc = "sparkle: cycle flashiness 1 -> 2 -> 3" },
   },
+  init = function()
+    -- tabline: <leader>1..9 jumps to the n-th buffer shown at the top
+    for i = 1, 9 do
+      vim.keymap.set("n", "<leader>" .. i, function() require("sparkle.tabline").go(i) end,
+        { desc = "Go to buffer " .. i })
+    end
+  end,
   opts = {
     style = "sparkle", -- initial style when nothing has been saved yet
     level = 2, -- initial flashiness (1..3) when nothing has been saved yet

@@ -22,6 +22,7 @@ M.features = {
   notify = true, -- vim.notify replacement
   cmdline = true, -- centred command line
   statusline = true, -- lualine config (needs the lualine spec to use sparkle.statusline)
+  tabline = true, -- buffer list at the top (replaces bufferline.nvim)
   toast = true, -- "SAVED!" pop-up on :w                       (decoration)
   warp = true, -- hyperspace jump on quit                       (decoration)
   glow = true, -- breathing borders / cursor line number        (decoration)
@@ -32,7 +33,7 @@ M.features = {
 }
 
 -- UI parts: always set up, told about the style via set_calm(calm)
-local UI = { "dashboard", "notify", "cmdline", "statusline" }
+local UI = { "dashboard", "notify", "cmdline", "statusline", "tabline" }
 -- decorations: only set up while the sparkle style is on, switched with set_active(on)
 local DECOR = { "toast", "warp", "glow", "stars", "trail", "linenr", "searchfx" }
 

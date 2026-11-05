@@ -44,10 +44,10 @@ https://github.com/nvim-lualine/lualine.nvim
 https://github.com/jiangmiao/auto-pairs
 括弧などのペア記号を補完する
 
-### bufferline.nvim
+### sparkle.nvim (自作, `sparkle.nvim/`)
 
-https://github.com/akinsho/bufferline.nvim
-タブバーを追加するためのプラグイン
+ダッシュボード・通知・コマンドライン・ステータスライン・タブライン（バッファ一覧）などの見た目をまとめた自作プラグイン。
+タブラインは bufferline.nvim の置き換え（`sparkle.tabline`）。
 
 ### nvim-cmp & cmp-nvim-lsp
 
