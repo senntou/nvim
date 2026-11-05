@@ -7,8 +7,44 @@ vim.cmd([[command! -nargs=1 -complete=help H help <args> | only]])
 vim.cmd([[command! Bufname echo bufname('%')]])
 
 
+-- ファイルを表示できる普通の窓か（NvimTree・ターミナル・フロートなどは除く）
+local function is_file_win(win)
+  local buf = vim.api.nvim_win_get_buf(win)
+  return vim.api.nvim_win_get_config(win).relative == ''
+    and vim.bo[buf].buftype == '' and vim.bo[buf].buflisted
+end
+
+-- NvimTree などにフォーカスがあるときは、先にファイルの窓へフォーカスを移す
+-- （そのまま :bnext するとツリーの窓がファイルで置き換わってしまう）
+local function focus_file_win()
+  local cur = vim.api.nvim_get_current_win()
+  if is_file_win(cur) then return end
+  -- 直前にいた窓 → 同じタブの最初のファイルの窓、の順に探す
+  local prev = vim.fn.win_getid(vim.fn.winnr('#'))
+  if prev ~= 0 and is_file_win(prev) then
+    vim.api.nvim_set_current_win(prev)
+    return
+  end
+  for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if is_file_win(w) then
+      vim.api.nvim_set_current_win(w)
+      return
+    end
+  end
+  -- ダッシュボードだけが開いている場合は、そこを置き換える
+  for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.bo[vim.api.nvim_win_get_buf(w)].filetype == 'sparkle' then
+      vim.api.nvim_set_current_win(w)
+      return
+    end
+  end
+  -- ファイルの窓が無い（ツリーだけ等）: 右側に窓を作ってそこで切り替える
+  vim.cmd('botright vsplit')
+end
+
 -- バッファを移動する関数
 function NextBuffer()
+  focus_file_win()
   vim.cmd(':bnext')
   -- terminal がある場合は、terminal の次のバッファに移動する
   if vim.bo.buftype == 'terminal' then
@@ -17,6 +53,7 @@ function NextBuffer()
 end
 
 function PrevBuffer()
+  focus_file_win()
   vim.cmd(':bprev')
   -- terminal がある場合は、terminal の次のバッファに移動する
   if vim.bo.buftype == 'terminal' then
