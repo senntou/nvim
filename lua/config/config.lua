@@ -1,3 +1,5 @@
+vim.o.termguicolors = true
+
 -- 文字コード
 vim.o.encoding = "utf-8"
 vim.o.fileencoding = "utf-8"
