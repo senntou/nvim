@@ -26,10 +26,9 @@ return {
   opts = {
     style = "sparkle", -- initial style when nothing has been saved yet
     level = 2, -- initial flashiness (1..3) when nothing has been saved yet
-    warp = {
-      word = false, -- 終了時の "SEE YOU!" を出さない（ワープの演出だけ残す）
-    },
+    -- warp = { word = "BYE!" }, -- 終了演出の文字を変える（false で文字なし）
     features = {
+      warp = false, -- 終了時のワープ演出 ("SEE YOU!") を出さず、すぐ終了する
       -- dashboard = true, notify = true, cmdline = true, statusline = true,
       -- toast = true, warp = true, glow = true, stars = true, trail = true, linenr = true,
     },
