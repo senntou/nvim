@@ -26,6 +26,9 @@ return {
   opts = {
     style = "sparkle", -- initial style when nothing has been saved yet
     level = 2, -- initial flashiness (1..3) when nothing has been saved yet
+    warp = {
+      word = false, -- 終了時の "SEE YOU!" を出さない（ワープの演出だけ残す）
+    },
     features = {
       -- dashboard = true, notify = true, cmdline = true, statusline = true,
       -- toast = true, warp = true, glow = true, stars = true, trail = true, linenr = true,

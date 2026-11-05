@@ -13,7 +13,7 @@ local active = true
 M.config = {
   duration = 0.55, -- seconds (Neovim waits for this before exiting)
   stars = 260,
-  word = "SEE YOU!",
+  word = "SEE YOU!", -- farewell word; false (or "") for the jump only
 }
 
 local function scene(stars, L)
@@ -84,8 +84,9 @@ function M.play()
   end
   local W, H = vim.o.columns, vim.o.lines
   local sc = (W >= 120 and H >= 30) and 2 or 1
-  local L = font.mask(M.config.word, sc, 6 * sc)
-  if L.w > W - 4 then L = nil end
+  local word = M.config.word
+  local L = (type(word) == "string" and word ~= "") and font.mask(word, sc, 6 * sc) or nil
+  if L and L.w > W - 4 then L = nil end
   -- Terminal buffers stop refreshing once Neovim is exiting, so this one is drawn into a plain
   -- buffer with highlight extmarks instead of going through sparkle.overlay.
   local buf = api.nvim_create_buf(false, true)

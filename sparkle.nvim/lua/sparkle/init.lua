@@ -4,6 +4,7 @@
 --     style = "sparkle",                    -- or "calm"; only used until :SparkleStyle saves a choice
 --     level = 2,                            -- flashiness 1..3; only used until :SparkleLevel saves one
 --     dashboard = { ... },                  -- sparkle.dashboard config
+--     warp = { word = false },              -- any feature: merged into require("sparkle.<name>").config
 --     features = { toast = false, ... },    -- turn individual features off (read at startup)
 --   })
 --
@@ -79,9 +80,18 @@ local function setup_dashboard()
   })
 end
 
+-- opts[name] (a table) is merged into that module's config before it is set up
+local function configure(name)
+  local o = opts_[name]
+  if name == "dashboard" or type(o) ~= "table" then return end
+  local mod = require("sparkle." .. name)
+  if type(mod.config) == "table" then mod.config = vim.tbl_deep_extend("force", mod.config, o) end
+end
+
 local function ensure(name)
   if loaded[name] then return true end
   local ok = try(name, function()
+    configure(name)
     if name == "dashboard" then setup_dashboard() else require("sparkle." .. name).setup() end
   end)
   loaded[name] = ok
