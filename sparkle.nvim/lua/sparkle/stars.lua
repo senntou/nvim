@@ -32,7 +32,7 @@ M.config = {
   idle_after = 30, -- seconds without input before twinkling pauses
   meteors = true, -- occasional shooting star
   below_eob = true, -- also fill the rows below the last buffer line (the "~" area)
-  exclude_ft = { "NvimTree", "sparkle", "lazy", "mason", "TelescopePrompt", "TelescopeResults", "alpha",
+  exclude_ft = { "sparkle", "lazy", "mason", "TelescopePrompt", "TelescopeResults", "alpha",
     "neo-tree", "Outline", "trouble", "qf", "DiffviewFiles", "NeogitStatus", "gitgraph" },
 }
 
@@ -112,7 +112,10 @@ end
 local excluded = {}
 local function eligible(win, buf)
   if not enabled or vim.b[buf].sparkle_stars == false then return false end
-  if vim.bo[buf].buftype ~= "" or excluded[vim.bo[buf].filetype] then return false end
+  -- special buffers only when they opt in (sparkle.tree sets b:sparkle_stars in NvimTree)
+  if (vim.bo[buf].buftype ~= "" and vim.b[buf].sparkle_stars ~= true) or excluded[vim.bo[buf].filetype] then
+    return false
+  end
   if api.nvim_win_get_config(win).relative ~= "" then return false end
   if vim.wo[win].diff then return false end
   return true
@@ -289,7 +292,9 @@ local function update_fill(w)
     local fwin = overlay.open_win(fbuf, false, vim.tbl_extend("force", wcfg, {
       style = "minimal", focusable = false, mouse = false, zindex = 1, noautocmd = true,
     }))
-    vim.wo[fwin].winhighlight = "Normal:Normal,NormalFloat:Normal,EndOfBuffer:Normal"
+    -- the target window's own Normal (NvimTree maps it to NvimTreeNormal, for example)
+    local nh = (vim.wo[w].winhighlight or ""):match("%f[%w]Normal:([%w_]+)") or "Normal"
+    vim.wo[fwin].winhighlight = ("Normal:%s,NormalFloat:%s,EndOfBuffer:%s"):format(nh, nh, nh)
     vim.wo[fwin].fillchars = "eob: "
     vim.wo[fwin].winblend = 0
     f = { win = fwin, buf = fbuf, cfg = cfg_key }
