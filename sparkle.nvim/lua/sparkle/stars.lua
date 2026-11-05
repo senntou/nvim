@@ -1,5 +1,6 @@
 -- sparkle.stars: a faint, twinkling star field in the empty space of normal editor windows
--- (blank lines and the area right of the text), plus the occasional shooting star.
+-- (blank lines, the area right of the text and the rows below the end of the buffer), plus the
+-- occasional shooting star.
 --
 -- Stars are ephemeral overlay extmarks drawn by a decoration provider, so they never touch the
 -- buffer, never hide text and cost nothing for lines that are off screen. Twinkling is done by
@@ -30,6 +31,7 @@ M.config = {
   fps = 8,
   idle_after = 30, -- seconds without input before twinkling pauses
   meteors = true, -- occasional shooting star
+  below_eob = true, -- also fill the rows below the last buffer line (the "~" area)
   exclude_ft = { "NvimTree", "sparkle", "lazy", "mason", "TelescopePrompt", "TelescopeResults", "alpha",
     "neo-tree", "Outline", "trouble", "qf", "DiffviewFiles", "NeogitStatus", "gitgraph" },
 }
@@ -233,6 +235,111 @@ local function on_line(_, win, buf, row)
   end
 end
 
+---------------------------------------------------------------- below the end of the buffer
+-- The decoration provider is only called for real buffer lines, so the "~" rows below the last
+-- line get a float of their own: unfocusable, click-through, lowest zindex, in the window's
+-- Normal colours, holding the stars as static extmarks (twinkling still works: it re-colours
+-- the SparkleStar groups). Filler row k is treated as buffer row line_count + k, so the stars
+-- stay put while scrolling, like the ones on real lines.
+local fill_ns = api.nvim_create_namespace("SparkleStarsFill")
+local fills = {} -- [target win] = { win = float, buf = float buf, key = "...", cfg = "..." }
+
+local function close_fill(w)
+  local f = fills[w]
+  if not f then return end
+  fills[w] = nil
+  if api.nvim_win_is_valid(f.win) then pcall(api.nvim_win_close, f.win, true) end
+  if api.nvim_buf_is_valid(f.buf) then pcall(api.nvim_buf_delete, f.buf, { force = true }) end
+end
+
+local function close_all_fills()
+  for w in pairs(fills) do close_fill(w) end
+end
+
+-- screen rows below the buffer text in window w (0 when the last line is not on screen)
+local function filler_geometry(w, buf)
+  local info = vim.fn.getwininfo(w)[1]
+  if not info then return nil end
+  local last = api.nvim_buf_line_count(buf)
+  if info.botline < last then return nil end
+  local ok, th = pcall(api.nvim_win_text_height, w, { start_row = info.topline - 1, end_row = last - 1 })
+  if not ok then return nil end
+  local used = th.all
+  local h, width = info.height - used, info.width - info.textoff
+  if h <= 0 or width <= 0 then return nil end
+  return { row = used + (info.winbar or 0), col = info.textoff, width = width, height = h,
+    leftcol = info.leftcol or 0, first = last }
+end
+
+local function update_fill(w)
+  local buf = api.nvim_win_get_buf(w)
+  local g = M.config.below_eob and eligible(w, buf) and filler_geometry(w, buf)
+  if not g then return close_fill(w) end
+  local f = fills[w]
+  if f and not (api.nvim_win_is_valid(f.win) and api.nvim_buf_is_valid(f.buf)) then
+    close_fill(w)
+    f = nil
+  end
+  local overlay = require("sparkle.overlay")
+  local wcfg = { relative = "win", win = w, row = g.row, col = g.col, width = g.width, height = g.height }
+  local cfg_key = table.concat({ g.row, g.col, g.width, g.height }, ",")
+  if not f then
+    local fbuf = api.nvim_create_buf(false, true)
+    vim.bo[fbuf].bufhidden = "wipe"
+    local fwin = overlay.open_win(fbuf, false, vim.tbl_extend("force", wcfg, {
+      style = "minimal", focusable = false, mouse = false, zindex = 1, noautocmd = true,
+    }))
+    vim.wo[fwin].winhighlight = "Normal:Normal,NormalFloat:Normal,EndOfBuffer:Normal"
+    vim.wo[fwin].fillchars = "eob: "
+    vim.wo[fwin].winblend = 0
+    f = { win = fwin, buf = fbuf, cfg = cfg_key }
+    fills[w] = f
+  elseif f.cfg ~= cfg_key then
+    overlay.win_set_config(f.win, wcfg)
+    f.cfg = cfg_key
+  end
+  -- contents only change with size, horizontal scroll, buffer length or the star layout
+  local key = table.concat({ g.width, g.height, g.leftcol, g.first, style.level }, ",")
+  if f.key == key then return end
+  f.key = key
+  local lines = {}
+  for i = 1, g.height do lines[i] = "" end
+  api.nvim_buf_set_lines(f.buf, 0, -1, false, lines)
+  api.nvim_buf_clear_namespace(f.buf, fill_ns, 0, -1)
+  for k = 0, g.height - 1 do
+    for _, st in ipairs(stars_for(g.first + k, g.width + g.leftcol)) do
+      local col = st[1] - g.leftcol
+      if col >= 0 and col < g.width then
+        api.nvim_buf_set_extmark(f.buf, fill_ns, k, 0, {
+          virt_text = { { st[2], st[3] } }, virt_text_win_col = col, hl_mode = "combine",
+        })
+      end
+    end
+  end
+end
+
+local fill_pending = false
+local function refresh_fills()
+  fill_pending = false
+  if not enabled or in_cmdline() then return end
+  local seen = {}
+  for _, w in ipairs(api.nvim_tabpage_list_wins(0)) do
+    if api.nvim_win_is_valid(w) and api.nvim_win_get_config(w).relative == "" then
+      seen[w] = true
+      pcall(update_fill, w)
+    end
+  end
+  for w in pairs(fills) do
+    if not seen[w] then close_fill(w) end -- closed, or in another tab page
+  end
+end
+
+local function schedule_fills()
+  if fill_pending then return end
+  fill_pending = true
+  vim.schedule(refresh_fills)
+end
+
 ---------------------------------------------------------------- loop
 local function stop()
   if timer then timer:stop() end
@@ -277,7 +384,13 @@ function M.set_active(on) M.toggle(on) end
 function M.toggle(on)
   if on == nil then on = not enabled end
   enabled = on
-  if not on then stop() else start() end
+  if not on then
+    stop()
+    close_all_fills()
+  else
+    start()
+    schedule_fills()
+  end
   pcall(api.nvim__redraw, { valid = false, flush = true })
 end
 
@@ -295,9 +408,20 @@ function M.setup()
   end })
   api.nvim_create_autocmd("OptionSet", { group = grp, pattern = "ambiwidth", callback = function()
     glyphs, cache, cache_w = pick_glyphs(), {}, -1
+    for _, f in pairs(fills) do f.key = nil end
+    schedule_fills()
+  end })
+  api.nvim_create_autocmd({ "WinScrolled", "WinResized", "VimResized", "WinEnter", "BufWinEnter", "TabEnter",
+    "TextChanged", "TextChangedI", "CmdlineLeave", "FileType", "OptionSet" }, { group = grp, callback = schedule_fills })
+  api.nvim_create_autocmd("WinClosed", { group = grp, callback = function(ev)
+    local w = tonumber(ev.match)
+    if w and fills[w] then vim.schedule(function() close_fill(w) end) end
+    schedule_fills()
   end })
   api.nvim_create_autocmd("User", { group = grp, pattern = "SparkleLevel", callback = function()
     glyphs, cache, cache_w = pick_glyphs(), {}, -1
+    for _, f in pairs(fills) do f.key = nil end
+    schedule_fills()
     schedule_meteor()
     paint(now())
     pcall(api.nvim__redraw, { valid = false, flush = true })
@@ -317,6 +441,7 @@ function M.setup()
 
   paint(now())
   start()
+  schedule_fills()
 end
 
 return M
