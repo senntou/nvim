@@ -240,11 +240,18 @@ function M.setup()
   local grp = api.nvim_create_augroup("SparkleSearchFx", { clear = true })
   api.nvim_create_autocmd("ColorScheme", { group = grp, callback = function() vim.schedule(M.define_hl) end })
   -- typing a new search: hand the highlighting back (sparkle.cmdline draws that phase)
-  api.nvim_create_autocmd("CmdlineEnter", { group = grp, pattern = { "/", "?" }, callback = M.deactivate })
-  api.nvim_create_autocmd("CmdlineLeave", { group = grp, pattern = { "/", "?" }, callback = function()
-    if vim.v.event.abort then return end
+  -- (no autocmd pattern here: patterns are globs, and "?" would match ":" as well, so opening any
+  -- command line switched the shimmer off)
+  local function is_search(ev) return ev.match == "/" or ev.match == "?" end
+  api.nvim_create_autocmd("CmdlineEnter", { group = grp, callback = function(ev)
+    if is_search(ev) then M.deactivate() end
+  end })
+  api.nvim_create_autocmd("CmdlineLeave", { group = grp, callback = function(ev)
+    if not is_search(ev) then return end
+    local abort = vim.v.event.abort
     vim.schedule(function()
-      if activate() then burst_here() end
+      -- an aborted search keeps the old pattern highlighted: shimmer again, without the burst
+      if activate() and not abort then burst_here() end
     end)
   end })
   -- landing on a match (n, N, *, #, ...) makes it burst

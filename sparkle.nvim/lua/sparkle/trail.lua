@@ -26,7 +26,7 @@ M.config = {
 local ns = api.nvim_create_namespace("SparkleTrail")
 local enabled = true
 local excluded = {}
-local parts = {} -- { x, y, vx, vy, age, life, col, glyph(optional fixed), light(bool: only light text) }
+local parts = {} -- { x, y, vx, vy, age, life, col, glyph(optional fixed), gw(glyph width), light(bool: only light text) }
 local win -- window the particles belong to
 local timer
 local view -- { top, leftcol, width, rowmap = {[buf row] = screen y}, buf }
@@ -94,12 +94,13 @@ local function compute_view()
   return v
 end
 
--- display cells of a buffer line: [abs display col] = char, " " for blanks/tabs, false inside wide chars
+-- display cells of a buffer line: [abs display col] = char, " " for blanks/tabs; the trailing cells of a
+-- wide char (CJK etc.) hold the number of its first cell, and c.wide[first cell] = its width
 local function line_cells(buf, row)
   local key = buf .. ":" .. row
   local c = cells_cache[key]
   if c then return c end
-  c = {}
+  c = { wide = {} }
   local line = api.nvim_buf_get_lines(buf, row, row + 1, false)[1] or ""
   local ts = vim.bo[buf].tabstop
   local col = 0
@@ -110,10 +111,10 @@ local function line_cells(buf, row)
       col = col + w
     else
       local w = ch:byte() < 128 and 1 or vim.fn.strdisplaywidth(ch)
-      if w == 1 then
-        c[col] = ch
-      else
-        for i = 0, w - 1 do c[col + i] = false end
+      c[col] = ch
+      if w > 1 then
+        c.wide[col] = w
+        for i = 1, w - 1 do c[col + i] = col end
       end
       col = col + max(1, w)
     end
@@ -139,17 +140,28 @@ local function on_line(_, w, buf, row)
       local x = floor(p.x + 0.5)
       if x >= 0 and x < v.width and not placed[x] then
         cells = cells or line_cells(buf, row)
-        local ch = cells[x + v.leftcol]
-        if ch ~= false then
+        local ax = x + v.leftcol
+        local ch = cells[ax]
+        if type(ch) == "number" then -- inside a wide char: light up the whole char from its first cell
+          ax = ch
+          ch = cells[ax]
+          x = ax - v.leftcol
+        end
+        if x >= 0 and not placed[x] then
           local k = 1 - p.age / p.life
-          local glyph
+          local glyph, gw
           if ch ~= nil and ch ~= " " then
-            glyph = ch -- light up the text underneath
+            glyph, gw = ch, cells.wide[ax] or 1 -- light up the text underneath
           elseif not p.light then
-            glyph = p.glyph or GLYPHS[min(#GLYPHS, 1 + floor((1 - k) * #GLYPHS))]
+            glyph, gw = p.glyph, p.gw or 1
+            -- a wide glyph (crumbling CJK char) needs a free cell on its right too
+            local nx = cells[ax + 1]
+            if not glyph or (gw > 1 and (x + 1 >= v.width or placed[x + 1] or (nx ~= nil and nx ~= " "))) then
+              glyph, gw = GLYPHS[min(#GLYPHS, 1 + floor((1 - k) * #GLYPHS))], 1
+            end
           end
           if glyph then
-            placed[x] = true
+            for d = 0, gw - 1 do placed[x + d] = true end
             local lvl = max(1, min(NLVL, floor(k * NLVL + 0.999)))
             api.nvim_buf_set_extmark(buf, ns, row, 0, {
               virt_text = { { glyph, ("SparkleSpark%d_%d"):format(p.col, lvl) } },
@@ -281,11 +293,11 @@ function M.crumble(x, y, text)
   local col, n = 0, 0
   for ch in text:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
     local cw = ch == "\t" and 1 or max(1, vim.fn.strdisplaywidth(ch))
-    if n < 24 and ch:match("%S") and cw == 1 then
+    if n < 24 and ch:match("%S") and ch ~= "\u{3000}" and cw <= 2 then
       n = n + 1
       add({
         x = x + col, y = y, vx = (random() - 0.5) * 6, vy = -(4 + random() * 4),
-        life = 0.45 + random() * 0.3, col = random() < 0.6 and 2 or 4, glyph = ch, grav = 28, drag = 1.2,
+        life = 0.45 + random() * 0.3, col = random() < 0.6 and 2 or 4, glyph = ch, gw = cw, grav = 28, drag = 1.2,
       })
     end
     col = col + cw
