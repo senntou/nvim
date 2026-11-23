@@ -606,10 +606,81 @@ local function define_hl()
   api.nvim_set_hl(0, "SparkleCmdlinePrompt", { default = true, fg = "#ffd34d", bold = true })
 end
 
+---------------------------------------------------------------- "pattern not found" guard
+-- With ext_cmdline the executed search is echoed ("/foo") on its own message line, so a following
+-- "E486: Pattern not found" makes two lines and stops at a hit-enter prompt. When the pattern has
+-- no match anywhere in the buffer, abort the search instead and say so with vim.notify.
+
+-- the pattern part of a "/pat/e;..." search command (nil when it can't be told apart safely)
+local function search_part(line, delim)
+  local i, n = 1, #line
+  while i <= n do
+    local c = line:sub(i, i)
+    if c == "\\" then
+      i = i + 2
+    elseif c == "[" then
+      return line:find(delim, i, true) == nil and line or nil -- a collection may hold the delimiter
+    elseif c == delim then
+      return line:sub(1, i - 1)
+    else
+      i = i + 1
+    end
+  end
+  return line
+end
+
+-- true only when pat is a valid pattern with no match in the current buffer
+local function no_match(pat)
+  if pat == nil or pat == "" then return false end
+  local ok, lnum = pcall(fn.search, pat, "nw")
+  return ok and lnum == 0
+end
+
+local function not_found(pat)
+  vim.schedule(function()
+    vim.notify("Pattern not found: " .. pat, vim.log.levels.WARN, { title = "search" })
+  end)
+end
+
+local function search_cr()
+  local t = fn.getcmdtype()
+  if t ~= "/" and t ~= "?" then return "<CR>" end
+  local line = fn.getcmdline()
+  local pat = search_part(line, t)
+  if not no_match(pat) then return "<CR>" end
+  fn.histadd("search", line) -- still recallable with <Up>
+  not_found(pat)
+  return "<C-c>"
+end
+
+local function search_next(key)
+  return function()
+    local pat = fn.getreg("/")
+    if no_match(pat) then
+      not_found(pat)
+      return ""
+    end
+    return key -- a typed count is still pending and applies to this key
+  end
+end
+
+local function map_guard()
+  vim.keymap.set("c", "<CR>", search_cr, { expr = true, desc = "sparkle: search without E486 stop" })
+  for _, k in ipairs({ "n", "N" }) do
+    vim.keymap.set({ "n", "x", "o" }, k, search_next(k), { expr = true, desc = "sparkle: " .. k .. " without E486 stop" })
+  end
+end
+
+local function unmap_guard()
+  pcall(vim.keymap.del, "c", "<CR>")
+  for _, k in ipairs({ "n", "N" }) do pcall(vim.keymap.del, { "n", "x", "o" }, k) end
+end
+
 function M.enable()
   if M.enabled or #api.nvim_list_uis() == 0 then return end
   M.enabled = true
   define_hl()
+  map_guard()
   vim.ui_attach(ns, { ext_cmdline = true }, function(event, ...)
     if not H[event] then return end
     if vim.in_fast_event() then
@@ -624,6 +695,7 @@ end
 function M.disable()
   if not M.enabled then return end
   M.enabled = false
+  unmap_guard()
   vim.ui_detach(ns)
   hide_windows()
 end
